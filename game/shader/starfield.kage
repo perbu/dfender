@@ -1,0 +1,77 @@
+//kage:unit pixels
+
+package main
+
+// Parallax starfield with twinkling stars in the game's art deco palette.
+var Time float
+var Resolution vec2
+
+// Hash function for pseudo-random star placement.
+func hash(p vec2) float {
+	h := dot(p, vec2(127.1, 311.7))
+	return fract(sin(h) * 43758.5453)
+}
+
+func hash2(p vec2) vec2 {
+	return vec2(hash(p), hash(p+vec2(37.0, 91.0)))
+}
+
+func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
+	uv := dstPos.xy
+
+	// Base color — deep navy matching the game palette.
+	col := vec3(0.02, 0.03, 0.08)
+
+	// Subtle nebula fog.
+	n1 := sin(uv.x*0.003+Time*0.05) * cos(uv.y*0.004+Time*0.03)
+	n2 := sin(uv.x*0.005-Time*0.04) * cos(uv.y*0.003+Time*0.06)
+	nebula := (n1 + n2) * 0.5
+	col += vec3(0.03, 0.01, 0.06) * (nebula*0.5 + 0.5)
+
+	// Three star layers with different densities and speeds for parallax.
+	for layer := 0; layer < 3; layer++ {
+		fl := float(layer)
+		cellSize := 30.0 + fl*25.0
+		drift := Time * (8.0 + fl*5.0)
+
+		// Offset UV per layer for parallax drift.
+		layerUV := uv + vec2(drift*0.3*(fl+1.0), drift*0.15*(fl+0.5))
+
+		// Grid cell.
+		cell := floor(layerUV / cellSize)
+		local := mod(layerUV, cellSize)
+
+		// Star position within cell.
+		starPos := hash2(cell+vec2(fl*100.0, fl*200.0)) * (cellSize - 4.0) + 2.0
+
+		// Distance to star.
+		d := length(local - starPos)
+
+		// Star brightness with twinkle.
+		brightness := hash(cell + vec2(fl*50.0, 0.0))
+		twinkle := sin(Time*1.5+brightness*20.0+cell.x*3.7+cell.y*5.3) * 0.5 + 0.5
+
+		// Size varies by layer — closer layers have bigger stars.
+		starSize := 1.0 + (2.0-fl) * 0.5
+		glow := smoothstep(starSize+3.0, 0.0, d)
+		core := smoothstep(starSize*0.5, 0.0, d)
+
+		// Color: mix gold/amber tones for bright stars, blue-white for dim.
+		starIntensity := (0.4 + brightness*0.6) * (0.6 + twinkle*0.4)
+		goldStar := vec3(0.96, 0.84, 0.48)  // ColorPlayer-ish gold
+		blueStar := vec3(0.6, 0.7, 1.0)
+		starColor := mix(blueStar, goldStar, brightness)
+
+		col += starColor * glow * starIntensity * 0.4
+		col += starColor * core * starIntensity * 0.8
+	}
+
+	// Vignette.
+	center := Resolution * 0.5
+	dist := length(uv - center) / length(center)
+	vignette := 1.0 - dist*dist*0.6
+
+	col *= vignette
+
+	return vec4(col, 1.0)
+}

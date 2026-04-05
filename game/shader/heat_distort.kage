@@ -1,0 +1,32 @@
+//kage:unit pixels
+
+package main
+
+// Heat distortion post-process — warps screen near a point.
+var HeatAmount float  // 0..1, how much distortion
+var HeatCenter vec2   // screen position of turret tip
+var Resolution vec2
+var Time float
+
+func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
+	dist := distance(dstPos.xy, HeatCenter)
+
+	// Distortion radius and falloff.
+	radius := 150.0 * HeatAmount
+	if dist > radius || HeatAmount < 0.01 {
+		return imageSrc0At(srcPos)
+	}
+
+	// Distortion amount falls off with distance.
+	falloff := 1.0 - dist/radius
+	falloff = falloff * falloff
+
+	// Wavy displacement.
+	disp := HeatAmount * falloff * 4.0
+	offset := vec2(
+		sin(dstPos.y*0.1+Time*8.0) * disp,
+		cos(dstPos.x*0.1+Time*7.0) * disp,
+	)
+
+	return imageSrc0At(srcPos + offset)
+}

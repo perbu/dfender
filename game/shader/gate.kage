@@ -1,0 +1,52 @@
+//kage:unit pixels
+
+package main
+
+// Swirling gate portal effect.
+// Drawn as a rectangle centered on the gate; the shader creates the circular swirl.
+var Time float
+var Intensity float // 0..1, increases before spawning
+var GateColor vec3  // teal or gold
+
+func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
+	// Center of the gate rect.
+	origin := imageSrc0Origin()
+	size := imageSrc0Size()
+	center := origin + size * 0.5
+	uv := (srcPos - center) / (size * 0.5)
+
+	dist := length(uv)
+
+	// Circular falloff.
+	if dist > 1.0 {
+		return vec4(0)
+	}
+
+	// Swirl angle increases toward center.
+	angle := atan2(uv.y, uv.x)
+	swirl := angle + dist*6.0 - Time*2.0
+
+	// Spiral arms.
+	arms := sin(swirl*3.0)*0.5 + 0.5
+	arms *= smoothstep(1.0, 0.2, dist) // fade at edge
+
+	// Core glow.
+	core := smoothstep(0.5, 0.0, dist) * 0.8
+
+	// Pulsing ring.
+	ring := smoothstep(0.05, 0.0, abs(dist-0.6-sin(Time*3.0)*0.1)) * 0.5
+
+	brightness := (arms*0.4 + core + ring) * Intensity
+
+	// Edge shimmer.
+	edgeShimmer := smoothstep(1.0, 0.85, dist) * smoothstep(0.75, 0.85, dist)
+	edgeShimmer *= (sin(angle*8.0-Time*4.0)*0.5 + 0.5) * 0.6 * Intensity
+
+	brightness += edgeShimmer
+
+	col := GateColor * brightness
+
+	alpha := brightness * smoothstep(1.0, 0.8, dist)
+
+	return vec4(col * alpha, alpha)
+}

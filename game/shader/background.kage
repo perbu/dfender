@@ -1,0 +1,52 @@
+//kage:unit pixels
+
+package main
+
+// Neon grid background — visible grid lines with glow at intersections.
+var Time float
+var Resolution vec2
+
+func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
+	uv := dstPos.xy
+
+	// Base color — very dark blue-black.
+	col := vec3(0.02, 0.03, 0.08)
+
+	// Grid lines.
+	gridSize := 80.0
+	gx := mod(uv.x, gridSize)
+	gy := mod(uv.y, gridSize)
+
+	// Distance to nearest grid line.
+	dx := min(gx, gridSize-gx)
+	dy := min(gy, gridSize-gy)
+	dLine := min(dx, dy)
+
+	// Visible grid lines — blue tint.
+	gridColor := vec3(0.1, 0.2, 0.5)
+	lineIntensity := smoothstep(1.5, 0.0, dLine) * 0.3
+
+	// Softer glow around lines.
+	lineGlow := smoothstep(6.0, 0.0, dLine) * 0.06
+	col += gridColor * (lineIntensity + lineGlow)
+
+	// Intersection glow — brighter nodes.
+	dIntersect := length(vec2(dx, dy))
+	pulse := sin(Time*0.5+uv.x*0.003+uv.y*0.004) * 0.5 + 0.5
+	intersectGlow := smoothstep(10.0, 0.0, dIntersect) * 0.15 * (0.5 + pulse*0.5)
+	col += vec3(0.15, 0.3, 0.7) * intersectGlow
+
+	// Subtle diagonal sweep.
+	diag := sin((uv.x+uv.y)*0.015 + Time*0.2) * 0.5 + 0.5
+	diagLine := smoothstep(0.97, 1.0, diag) * 0.06
+	col += vec3(0.2, 0.3, 0.6) * diagLine
+
+	// Vignette.
+	center := Resolution * 0.5
+	dist := length(uv - center) / length(center)
+	vignette := 1.0 - dist*dist*0.5
+
+	col *= vignette
+
+	return vec4(col, 1.0)
+}
