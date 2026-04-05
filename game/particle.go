@@ -35,7 +35,7 @@ func spawnExplosion(g *Game, x, y float64, col color.RGBA, count int) {
 }
 
 func spawnThrustParticles(g *Game, x, y, dirX, dirY float64, col color.RGBA) {
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 5; i++ {
 		spread := (rand.Float64() - 0.5) * 0.5
 		speed := 2.0 + rand.Float64()*2.0
 		life := 10 + rand.Intn(10)

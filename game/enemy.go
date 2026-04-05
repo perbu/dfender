@@ -54,6 +54,23 @@ func updateEnemies(g *Game) {
 	g.Enemies = g.Enemies[:n]
 }
 
+func spawnEnemyThrustParticles(g *Game) {
+	for i := range g.Enemies {
+		e := &g.Enemies[i]
+		if !e.Alive {
+			continue
+		}
+		speed := math.Sqrt(e.VX*e.VX + e.VY*e.VY)
+		if speed < 0.5 {
+			continue
+		}
+		// Exhaust opposite to movement direction.
+		dirX := -e.VX / speed
+		dirY := -e.VY / speed
+		spawnThrustParticles(g, e.X+dirX*EnemyRadius, e.Y+dirY*EnemyRadius, dirX, dirY, ColorEnemy)
+	}
+}
+
 func drawEnemies(screen *ebiten.Image, g *Game, ox, oy float64) {
 	for i := range g.Enemies {
 		e := &g.Enemies[i]
@@ -61,6 +78,10 @@ func drawEnemies(screen *ebiten.Image, g *Game, ox, oy float64) {
 		cy := float32(e.Y + oy)
 
 		col := ColorEnemy
+		if e.MaxHP > 1 {
+			hpFrac := float32(e.HP) / float32(e.MaxHP)
+			col = lerpColor(ColorEnemyHurt, ColorEnemy, hpFrac)
+		}
 		if e.FlashFrames > 0 {
 			col = ColorUI // white flash
 		}
@@ -71,16 +92,5 @@ func drawEnemies(screen *ebiten.Image, g *Game, ox, oy float64) {
 
 		angle := math.Atan2(e.VY, e.VX)
 		drawPolygon(screen, cx, cy, r, 3, angle, 4, col)
-
-		// HP indicator for tough enemies.
-		if e.MaxHP > 1 {
-			hpFrac := float32(e.HP) / float32(e.MaxHP)
-			barW := r * 2
-			barH := float32(3)
-			barX := cx - r
-			barY := cy - r - 6
-			vector.DrawFilledRect(screen, barX, barY, barW*hpFrac, barH, col, false)
-			vector.StrokeRect(screen, barX, barY, barW, barH, 1, ColorBorderDim, false)
-		}
 	}
 }

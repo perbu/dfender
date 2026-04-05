@@ -12,6 +12,7 @@ const (
 	EventWaveComplete
 	EventOverheat
 	EventProjectileWallHit
+	EventFired
 )
 
 // Event is a value type describing something that happened this frame.

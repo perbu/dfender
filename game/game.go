@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -26,6 +27,7 @@ var (
 	ColorBorderDim  = color.RGBA{0x6A, 0x54, 0x22, 0xFF}
 	ColorPlayer     = color.RGBA{0xF5, 0xD6, 0x7B, 0xFF}
 	ColorEnemy      = color.RGBA{0x00, 0xC9, 0xA7, 0xFF}
+	ColorEnemyHurt  = color.RGBA{0xFF, 0x69, 0xB4, 0xFF} // hot pink at 0% HP
 	ColorProjectile = color.RGBA{0xFF, 0xE0, 0x80, 0xFF}
 	ColorUI         = color.RGBA{0xF0, 0xE6, 0xD3, 0xFF}
 	ColorHeatCool   = color.RGBA{0xD4, 0xA8, 0x43, 0xFF}
@@ -81,14 +83,18 @@ type Game struct {
 	// Shaders and render pipeline
 	Shaders *Shaders
 
+	// Sound
+	Sound *SoundManager
+
 	// Menu
 	MenuSelection int // 0=New Game, 1=Credits, 2=Quit
 }
 
-func New() *Game {
+func New(musicData []byte) *Game {
 	g := &Game{
 		State:   StateMenu,
 		Shaders: NewShaders(),
+		Sound:   NewSoundManager(musicData),
 	}
 	return g
 }
@@ -109,10 +115,16 @@ func (g *Game) reset() {
 	g.Score = ScoreTracker{}
 	g.ShakeFrames = 0
 	g.Tick = 0
+	g.Sound.PlayMusic()
 }
 
 func (g *Game) Update() error {
 	g.Tick++
+
+	// Global key: toggle music.
+	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
+		g.Sound.ToggleMusic()
+	}
 
 	switch g.State {
 	case StateMenu:
@@ -126,6 +138,10 @@ func (g *Game) Update() error {
 		g.Events = g.Events[:0]
 		g.updateWaveIntro()
 	case StateGameOver:
+		// Decay screen shake (post-mortem).
+		if g.ShakeFrames > 0 {
+			g.ShakeFrames--
+		}
 		if ebiten.IsKeyPressed(ebiten.KeyEnter) {
 			g.State = StateMenu
 			g.MenuSelection = 0
@@ -141,6 +157,7 @@ func (g *Game) updatePlaying() {
 	g.Turret.Update(g)
 	updateProjectiles(g)
 	updateEnemies(g)
+	spawnEnemyThrustParticles(g)
 	checkCollisions(g)
 	g.Score.Update()
 	g.Wave.Update(g)
@@ -148,6 +165,7 @@ func (g *Game) updatePlaying() {
 
 	// Drain events.
 	for _, e := range g.Events {
+		g.Sound.HandleEvent(e)
 		switch e.Type {
 		case EventEnemyKilled:
 			g.Score.AddKill(int(e.Value))
@@ -155,7 +173,7 @@ func (g *Game) updatePlaying() {
 		case EventEnemyHit:
 			spawnExplosion(g, e.X, e.Y, ColorUI, 5)
 		case EventPlayerDied:
-			g.ShakeFrames = 30
+			g.ShakeFrames = 120 // 2 seconds at 60 TPS
 			g.ShakeAmount = 12
 			spawnExplosion(g, e.X, e.Y, ColorPlayer, 40)
 			g.State = StateGameOver
@@ -165,7 +183,7 @@ func (g *Game) updatePlaying() {
 			g.ShakeAmount = 3
 			spawnExplosion(g, e.X, e.Y, ColorBorder, 8)
 		case EventWallDeath:
-			g.ShakeFrames = 30
+			g.ShakeFrames = 120 // 2 seconds at 60 TPS
 			g.ShakeAmount = 12
 			spawnExplosion(g, e.X, e.Y, ColorPlayer, 40)
 			g.State = StateGameOver
