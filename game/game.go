@@ -83,7 +83,6 @@ type Game struct {
 
 	// Menu
 	MenuSelection int // 0=New Game, 1=Credits, 2=Quit
-	MenuKeyDelay  int // debounce for menu nav
 }
 
 func New() *Game {
@@ -130,7 +129,6 @@ func (g *Game) Update() error {
 		if ebiten.IsKeyPressed(ebiten.KeyEnter) {
 			g.State = StateMenu
 			g.MenuSelection = 0
-			g.MenuKeyDelay = 15
 		}
 	}
 	return nil
@@ -161,6 +159,7 @@ func (g *Game) updatePlaying() {
 			g.ShakeAmount = 12
 			spawnExplosion(g, e.X, e.Y, ColorPlayer, 40)
 			g.State = StateGameOver
+			return
 		case EventWallBounce:
 			g.ShakeFrames = 5
 			g.ShakeAmount = 3
@@ -170,9 +169,11 @@ func (g *Game) updatePlaying() {
 			g.ShakeAmount = 12
 			spawnExplosion(g, e.X, e.Y, ColorPlayer, 40)
 			g.State = StateGameOver
+			return
 		case EventWaveComplete:
 			g.State = StateWaveIntro
 			g.Wave.NextWave()
+			return
 		case EventOverheat:
 			spawnExplosion(g, e.X, e.Y, ColorHeatHot, 10)
 		case EventProjectileWallHit:

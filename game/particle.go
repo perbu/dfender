@@ -75,6 +75,9 @@ func drawParticles(screen *ebiten.Image, g *Game, ox, oy float64) {
 		p := &g.Particles[i]
 		alpha := float32(p.Life) / float32(p.MaxLife)
 		col := p.Color
+		col.R = uint8(float32(col.R) * alpha)
+		col.G = uint8(float32(col.G) * alpha)
+		col.B = uint8(float32(col.B) * alpha)
 		col.A = uint8(float32(col.A) * alpha)
 		cx := float32(p.X + ox)
 		cy := float32(p.Y + oy)

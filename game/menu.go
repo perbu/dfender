@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -14,28 +15,19 @@ const menuItemCount = 3
 var menuLabels = [menuItemCount]string{"NEW GAME", "CREDITS", "QUIT"}
 
 func (g *Game) updateMenu() {
-	if g.MenuKeyDelay > 0 {
-		g.MenuKeyDelay--
-		return
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) || ebiten.IsKeyPressed(ebiten.KeyS) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) || inpututil.IsKeyJustPressed(ebiten.KeyS) {
 		g.MenuSelection = (g.MenuSelection + 1) % menuItemCount
-		g.MenuKeyDelay = 12
 	}
-	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) || inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		g.MenuSelection = (g.MenuSelection + menuItemCount - 1) % menuItemCount
-		g.MenuKeyDelay = 12
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyEnter) || ebiten.IsKeyPressed(ebiten.KeySpace) {
-		g.MenuKeyDelay = 15
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		switch g.MenuSelection {
 		case 0: // New Game
 			g.reset()
 		case 1: // Credits
 			g.State = StateCredits
-			g.MenuKeyDelay = 20
 		case 2: // Quit
 			os.Exit(0)
 		}
@@ -43,13 +35,8 @@ func (g *Game) updateMenu() {
 }
 
 func (g *Game) updateCredits() {
-	if g.MenuKeyDelay > 0 {
-		g.MenuKeyDelay--
-		return
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyEscape) || ebiten.IsKeyPressed(ebiten.KeyEnter) || ebiten.IsKeyPressed(ebiten.KeySpace) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyEnter) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		g.State = StateMenu
-		g.MenuKeyDelay = 15
 	}
 }
 

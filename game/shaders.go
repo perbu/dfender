@@ -41,9 +41,9 @@ type Shaders struct {
 
 	// Offscreen images for bloom pipeline.
 	SceneImage  *ebiten.Image // full-res scene
-	BrightImage *ebiten.Image // half-res bright extraction
-	BlurTemp    *ebiten.Image // half-res blur intermediate
-	BloomImage  *ebiten.Image // half-res final bloom
+	BrightImage *ebiten.Image // bright extraction
+	BlurTemp    *ebiten.Image // blur intermediate
+	BloomImage  *ebiten.Image // final bloom
 
 	// Gate portal rendering.
 	GateImage  *ebiten.Image // render target
@@ -51,6 +51,10 @@ type Shaders struct {
 
 	// Temp image for heat distortion pass.
 	HeatTemp *ebiten.Image
+
+	// Reusable option structs to avoid per-frame allocations.
+	rectOpts  ebiten.DrawRectShaderOptions
+	imageOpts ebiten.DrawImageOptions
 }
 
 func NewShaders() *Shaders {
@@ -151,20 +155,18 @@ func (s *Shaders) blurPass(src *ebiten.Image, spread float32) {
 	w, h := ScreenWidth, ScreenHeight
 
 	s.BlurTemp.Clear()
-	hOpts := &ebiten.DrawRectShaderOptions{}
-	hOpts.Uniforms = map[string]any{
+	s.rectOpts.Uniforms = map[string]any{
 		"Spread": spread,
 	}
-	hOpts.Images[0] = src
-	s.BlurTemp.DrawRectShader(w, h, s.BlurH, hOpts)
+	s.rectOpts.Images[0] = src
+	s.BlurTemp.DrawRectShader(w, h, s.BlurH, &s.rectOpts)
 
 	s.BloomImage.Clear()
-	vOpts := &ebiten.DrawRectShaderOptions{}
-	vOpts.Uniforms = map[string]any{
+	s.rectOpts.Uniforms = map[string]any{
 		"Spread": spread,
 	}
-	vOpts.Images[0] = s.BlurTemp
-	s.BloomImage.DrawRectShader(w, h, s.BlurV, vOpts)
+	s.rectOpts.Images[0] = s.BlurTemp
+	s.BloomImage.DrawRectShader(w, h, s.BlurV, &s.rectOpts)
 }
 
 // ApplyBloom uses cascaded blur passes for a smooth, wide glow.
@@ -175,12 +177,12 @@ func (s *Shaders) ApplyBloom(dst *ebiten.Image) {
 
 	// 1. Extract bright pixels.
 	s.BrightImage.Clear()
-	brightOpts := &ebiten.DrawRectShaderOptions{}
-	brightOpts.Uniforms = map[string]any{
+	s.rectOpts = ebiten.DrawRectShaderOptions{}
+	s.rectOpts.Uniforms = map[string]any{
 		"Threshold": float32(0.08),
 	}
-	brightOpts.Images[0] = s.SceneImage
-	s.BrightImage.DrawRectShader(w, h, s.BloomBright, brightOpts)
+	s.rectOpts.Images[0] = s.SceneImage
+	s.BrightImage.DrawRectShader(w, h, s.BloomBright, &s.rectOpts)
 
 	// 2. Composite scene first.
 	dst.DrawImage(s.SceneImage, nil)
@@ -192,25 +194,25 @@ func (s *Shaders) ApplyBloom(dst *ebiten.Image) {
 	s.BrightImage.Clear()
 	s.BrightImage.DrawImage(s.BloomImage, nil)
 	// Composite tight glow.
-	bloomOpts := &ebiten.DrawImageOptions{}
-	bloomOpts.Blend = ebiten.BlendLighter
-	dst.DrawImage(s.BloomImage, bloomOpts)
+	s.imageOpts = ebiten.DrawImageOptions{}
+	s.imageOpts.Blend = ebiten.BlendLighter
+	dst.DrawImage(s.BloomImage, &s.imageOpts)
 
 	// Pass 2: blur the already-blurred image (medium glow).
 	s.blurPass(s.BrightImage, 3.0)
 	s.BrightImage.Clear()
 	s.BrightImage.DrawImage(s.BloomImage, nil)
-	bloomOpts2 := &ebiten.DrawImageOptions{}
-	bloomOpts2.Blend = ebiten.BlendLighter
-	bloomOpts2.ColorScale.Scale(0.6, 0.6, 0.6, 0.6)
-	dst.DrawImage(s.BloomImage, bloomOpts2)
+	s.imageOpts = ebiten.DrawImageOptions{}
+	s.imageOpts.Blend = ebiten.BlendLighter
+	s.imageOpts.ColorScale.Scale(0.6, 0.6, 0.6, 0.6)
+	dst.DrawImage(s.BloomImage, &s.imageOpts)
 
 	// Pass 3: blur again (wide, soft outer glow).
 	s.blurPass(s.BrightImage, 4.0)
-	bloomOpts3 := &ebiten.DrawImageOptions{}
-	bloomOpts3.Blend = ebiten.BlendLighter
-	bloomOpts3.ColorScale.Scale(0.3, 0.3, 0.3, 0.3)
-	dst.DrawImage(s.BloomImage, bloomOpts3)
+	s.imageOpts = ebiten.DrawImageOptions{}
+	s.imageOpts.Blend = ebiten.BlendLighter
+	s.imageOpts.ColorScale.Scale(0.3, 0.3, 0.3, 0.3)
+	dst.DrawImage(s.BloomImage, &s.imageOpts)
 }
 
 // ApplyHeatDistortion applies screen-space heat distortion.
