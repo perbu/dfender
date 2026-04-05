@@ -35,7 +35,11 @@ func drawUI(screen *ebiten.Image, g *Game) {
 
 	// Game over.
 	if g.State == StateGameOver {
-		msg := fmt.Sprintf("GAME OVER\n\nSCORE: %d\nWAVE: %d\n\nPRESS ENTER TO RESTART", g.Score.Score, g.Wave.Number)
+		msg := fmt.Sprintf("GAME OVER\n\nSCORE: %d\nWAVE: %d", g.Score.Score, g.Wave.Number)
+		if g.HighScores.Qualifies(g.Score.Score) {
+			msg += "\n\nNEW HIGH SCORE!"
+		}
+		msg += "\n\nPRESS ENTER TO CONTINUE"
 		ebitenutil.DebugPrintAt(screen, msg, ScreenWidth/2-80, ScreenHeight/2-40)
 	}
 

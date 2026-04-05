@@ -10,9 +10,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-const menuItemCount = 3
+const menuItemCount = 4
 
-var menuLabels = [menuItemCount]string{"NEW GAME", "CREDITS", "QUIT"}
+var menuLabels = [menuItemCount]string{"NEW GAME", "HIGH SCORES", "CREDITS", "QUIT"}
 
 func (g *Game) updateMenu() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) || inpututil.IsKeyJustPressed(ebiten.KeyS) {
@@ -26,15 +26,23 @@ func (g *Game) updateMenu() {
 		switch g.MenuSelection {
 		case 0: // New Game
 			g.reset()
-		case 1: // Credits
+		case 1: // High Scores
+			g.State = StateHighScores
+		case 2: // Credits
 			g.State = StateCredits
-		case 2: // Quit
+		case 3: // Quit
 			os.Exit(0)
 		}
 	}
 }
 
 func (g *Game) updateCredits() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyEnter) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		g.State = StateMenu
+	}
+}
+
+func (g *Game) updateHighScores() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) || inpututil.IsKeyJustPressed(ebiten.KeyEnter) || inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		g.State = StateMenu
 	}
@@ -80,6 +88,11 @@ func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 		return
 	}
 
+	if g.State == StateHighScores {
+		g.drawHighScores(screen)
+		return
+	}
+
 	// Menu items.
 	menuStartY := ScreenHeight/2 - 20
 	for i, label := range menuLabels {
@@ -119,4 +132,30 @@ func (g *Game) drawCredits(screen *ebiten.Image) {
 
 	cy += 60
 	ebitenutil.DebugPrintAt(screen, "PRESS ENTER OR ESC TO RETURN", cx-20, cy)
+}
+
+func (g *Game) drawHighScores(screen *ebiten.Image) {
+	cx := ScreenWidth/2 - 140
+	cy := ScreenHeight/2 - 160
+
+	ebitenutil.DebugPrintAt(screen, "H I G H   S C O R E S", cx+30, cy)
+	cy += 40
+
+	if len(g.HighScores.Entries) == 0 {
+		ebitenutil.DebugPrintAt(screen, "No scores yet. Go play!", cx+20, cy+40)
+	} else {
+		// Header.
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%-4s %-12s %8s %5s  %s", "#", "NAME", "SCORE", "WAVE", "DATE"), cx, cy)
+		cy += 25
+
+		for i, e := range g.HighScores.Entries {
+			line := fmt.Sprintf("%-4d %-12s %8d %5d  %s",
+				i+1, e.Name, e.Score, e.Wave, e.Date.Format("2006-01-02"))
+			ebitenutil.DebugPrintAt(screen, line, cx, cy)
+			cy += 22
+		}
+	}
+
+	cy = ScreenHeight/2 + 140
+	ebitenutil.DebugPrintAt(screen, "PRESS ENTER OR ESC TO RETURN", cx, cy)
 }

@@ -3,6 +3,7 @@ package game
 import (
 	"image/color"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -43,6 +44,7 @@ const (
 	StateGameOver
 	StateWaveIntro
 	StateCredits
+	StateHighScores
 	StateRespawn
 )
 
@@ -97,14 +99,18 @@ type Game struct {
 	Sound *SoundManager
 
 	// Menu
-	MenuSelection int // 0=New Game, 1=Credits, 2=Quit
+	MenuSelection int // 0=New Game, 1=High Scores, 2=Credits, 3=Quit
+
+	// High scores
+	HighScores HighScoreTable
 }
 
 func New(musicData []byte) *Game {
 	g := &Game{
-		State:   StateMenu,
-		Shaders: NewShaders(),
-		Sound:   NewSoundManager(musicData),
+		State:      StateMenu,
+		Shaders:    NewShaders(),
+		Sound:      NewSoundManager(musicData),
+		HighScores: LoadHighScores(),
 	}
 	return g
 }
@@ -143,6 +149,8 @@ func (g *Game) Update() error {
 		g.updateMenu()
 	case StateCredits:
 		g.updateCredits()
+	case StateHighScores:
+		g.updateHighScores()
 	case StatePlaying:
 		g.Events = g.Events[:0]
 		g.updatePlaying()
@@ -156,7 +164,8 @@ func (g *Game) Update() error {
 		if g.ShakeFrames > 0 {
 			g.ShakeFrames--
 		}
-		if ebiten.IsKeyPressed(ebiten.KeyEnter) {
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			g.submitHighScore()
 			g.State = StateMenu
 			g.MenuSelection = 0
 		}
@@ -248,6 +257,18 @@ func (g *Game) updateWaveIntro() {
 	}
 }
 
+func (g *Game) submitHighScore() {
+	if g.HighScores.Qualifies(g.Score.Score) {
+		g.HighScores.Add(HighScoreEntry{
+			Name:  getUsername(),
+			Score: g.Score.Score,
+			Wave:  g.Wave.Number,
+			Date:  time.Now(),
+		})
+		g.HighScores.Save()
+	}
+}
+
 func (g *Game) respawn() {
 	g.Player = NewPlayer(ScreenWidth/2, ScreenHeight/2)
 	g.Turret.Heat = 0
@@ -275,7 +296,7 @@ func (g *Game) updateRespawn() {
 func (g *Game) Draw(screen *ebiten.Image) {
 	s := g.Shaders
 
-	if g.State == StateMenu || g.State == StateCredits {
+	if g.State == StateMenu || g.State == StateCredits || g.State == StateHighScores {
 		g.drawMenuScreen(screen)
 		return
 	}
