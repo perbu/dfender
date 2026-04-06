@@ -105,7 +105,8 @@ type Game struct {
 	HighScores HighScoreTable
 }
 
-func New(musicData []byte) *Game {
+func New(musicData, fontData []byte) *Game {
+	InitFonts(fontData)
 	g := &Game{
 		State:      StateMenu,
 		Shaders:    NewShaders(),

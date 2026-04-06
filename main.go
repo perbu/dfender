@@ -11,12 +11,15 @@ import (
 //go:embed assets/One_Last_Life_Remaining.mp3
 var musicData []byte
 
+//go:embed assets/orbitron-light.otf
+var fontData []byte
+
 func main() {
 	ebiten.SetWindowSize(game.ScreenWidth, game.ScreenHeight)
 	ebiten.SetWindowTitle("dFender")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
-	g := game.New(musicData)
+	g := game.New(musicData, fontData)
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}

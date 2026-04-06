@@ -2,11 +2,12 @@ package game
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -48,6 +49,23 @@ func (g *Game) updateHighScores() {
 	}
 }
 
+// drawTextCentered draws text horizontally centered at the given Y position.
+func drawTextCentered(screen *ebiten.Image, s string, face *text.GoTextFace, y float64, clr color.Color) {
+	w, _ := text.Measure(s, face, 0)
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(ScreenWidth)/2-w/2, y)
+	op.ColorScale.ScaleWithColor(clr)
+	text.Draw(screen, s, face, op)
+}
+
+// drawTextAt draws text at the given position.
+func drawTextAt(screen *ebiten.Image, s string, face *text.GoTextFace, x, y float64, clr color.Color) {
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(x, y)
+	op.ColorScale.ScaleWithColor(clr)
+	text.Draw(screen, s, face, op)
+}
+
 func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 	s := g.Shaders
 
@@ -75,13 +93,11 @@ func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 	// Bloom the scene.
 	s.ApplyBloom(screen)
 
-	// Title — drawn on top of bloom.
-	titleX := ScreenWidth/2 - 60
-	titleY := 200
-	ebitenutil.DebugPrintAt(screen, "d F E N D E R", titleX, titleY)
+	// Title.
+	drawTextCentered(screen, "dFENDER", FontTitle, 180, ColorBorder)
 
 	// Subtitle.
-	ebitenutil.DebugPrintAt(screen, "A R E N A   S H O O T E R", titleX-50, titleY+30)
+	drawTextCentered(screen, "ARENA SHOOTER", FontMenu, 270, ColorBorderDim)
 
 	if g.State == StateCredits {
 		g.drawCredits(screen)
@@ -94,68 +110,70 @@ func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 	}
 
 	// Menu items.
-	menuStartY := ScreenHeight/2 - 20
+	menuStartY := float64(ScreenHeight)/2 - 40
 	for i, label := range menuLabels {
-		y := menuStartY + i*40
-		x := ScreenWidth/2 - 50
+		y := menuStartY + float64(i)*50
 
+		clr := color.Color(ColorUI)
 		if i == g.MenuSelection {
-			// Selection indicator — gold chevron.
-			indicator := fmt.Sprintf("> %s <", label)
-			ebitenutil.DebugPrintAt(screen, indicator, x-20, y)
-		} else {
-			ebitenutil.DebugPrintAt(screen, label, x, y)
+			clr = ColorBorder
+			label = "> " + label + " <"
 		}
+		drawTextCentered(screen, label, FontMenu, y, clr)
 	}
 
 	// Nav hint.
-	ebitenutil.DebugPrintAt(screen, "W/S or ARROWS to navigate  -  ENTER to select", ScreenWidth/2-160, ScreenHeight-120)
+	drawTextCentered(screen, "W/S or ARROWS to navigate  —  ENTER to select", FontMenuSmall, float64(ScreenHeight)-120, ColorBorderDim)
 }
 
 func (g *Game) drawCredits(screen *ebiten.Image) {
-	cx := ScreenWidth/2 - 100
-	cy := ScreenHeight/2 - 80
+	cy := float64(ScreenHeight)/2 - 100
 
-	ebitenutil.DebugPrintAt(screen, "C R E D I T S", cx+30, cy)
-	cy += 50
-	ebitenutil.DebugPrintAt(screen, "Game Design & Programming", cx, cy)
-	cy += 20
-	ebitenutil.DebugPrintAt(screen, "Per Buer", cx+30, cy)
-
-	cy += 40
-	ebitenutil.DebugPrintAt(screen, "AI Co-Pilot & Code Generation", cx-15, cy)
-	cy += 20
-	ebitenutil.DebugPrintAt(screen, "Claude (Anthropic)", cx+15, cy)
-
-	cy += 40
-	ebitenutil.DebugPrintAt(screen, "Built with Ebitengine", cx+5, cy)
-
+	drawTextCentered(screen, "CREDITS", FontMenu, cy, ColorBorder)
 	cy += 60
-	ebitenutil.DebugPrintAt(screen, "PRESS ENTER OR ESC TO RETURN", cx-20, cy)
+
+	drawTextCentered(screen, "Game Design & Programming", FontMenuSmall, cy, ColorUI)
+	cy += 30
+	drawTextCentered(screen, "Per Buer", FontMenu, cy, ColorBorder)
+	cy += 60
+
+	drawTextCentered(screen, "AI Co-Pilot & Code Generation", FontMenuSmall, cy, ColorUI)
+	cy += 30
+	drawTextCentered(screen, "Claude (Anthropic)", FontMenu, cy, ColorBorder)
+	cy += 60
+
+	drawTextCentered(screen, "Built with Ebitengine", FontMenuSmall, cy, ColorUI)
+	cy += 80
+
+	drawTextCentered(screen, "PRESS ENTER OR ESC TO RETURN", FontMenuSmall, cy, ColorBorderDim)
 }
 
 func (g *Game) drawHighScores(screen *ebiten.Image) {
-	cx := ScreenWidth/2 - 140
-	cy := ScreenHeight/2 - 160
+	cy := float64(ScreenHeight)/2 - 200
 
-	ebitenutil.DebugPrintAt(screen, "H I G H   S C O R E S", cx+30, cy)
-	cy += 40
+	drawTextCentered(screen, "HIGH SCORES", FontMenu, cy, ColorBorder)
+	cy += 60
 
 	if len(g.HighScores.Entries) == 0 {
-		ebitenutil.DebugPrintAt(screen, "No scores yet. Go play!", cx+20, cy+40)
+		drawTextCentered(screen, "No scores yet. Go play!", FontMenuSmall, cy+40, ColorUI)
 	} else {
 		// Header.
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%-4s %-12s %8s %5s  %s", "#", "NAME", "SCORE", "WAVE", "DATE"), cx, cy)
-		cy += 25
+		header := fmt.Sprintf("%-4s  %-12s  %8s  %5s   %s", "#", "NAME", "SCORE", "WAVE", "DATE")
+		drawTextCentered(screen, header, FontMenuSmall, cy, ColorBorderDim)
+		cy += 35
 
 		for i, e := range g.HighScores.Entries {
-			line := fmt.Sprintf("%-4d %-12s %8d %5d  %s",
+			line := fmt.Sprintf("%-4d  %-12s  %8d  %5d   %s",
 				i+1, e.Name, e.Score, e.Wave, e.Date.Format("2006-01-02"))
-			ebitenutil.DebugPrintAt(screen, line, cx, cy)
-			cy += 22
+			clr := color.Color(ColorUI)
+			if i == 0 {
+				clr = ColorBorder
+			}
+			drawTextCentered(screen, line, FontMenuSmall, cy, clr)
+			cy += 30
 		}
 	}
 
-	cy = ScreenHeight/2 + 140
-	ebitenutil.DebugPrintAt(screen, "PRESS ENTER OR ESC TO RETURN", cx, cy)
+	cy = float64(ScreenHeight)/2 + 200
+	drawTextCentered(screen, "PRESS ENTER OR ESC TO RETURN", FontMenuSmall, cy, ColorBorderDim)
 }
