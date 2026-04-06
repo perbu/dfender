@@ -206,8 +206,8 @@ func sfxLaser() []byte {
 	return GenerateSFX(SFXParams{
 		WaveType:    2, // Pure sine — clean "pew" with no harmonics
 		AttackTime:  0.0,
-		SustainTime: 0.01,
-		DecayTime:   0.06,
+		SustainTime: 0.005,
+		DecayTime:   0.04,
 		BaseFreq:    900,
 		FreqSlide:   -4000,
 		FreqLimit:   150,
@@ -219,8 +219,8 @@ func sfxExplosion() []byte {
 	return GenerateSFX(SFXParams{
 		WaveType:    3, // Noise
 		AttackTime:  0.0,
-		SustainTime: 0.08,
-		DecayTime:   0.35,
+		SustainTime: 0.05,
+		DecayTime:   0.18,
 		BaseFreq:    120,
 		FreqSlide:   -80,
 		LPFCutoff:   0.3,

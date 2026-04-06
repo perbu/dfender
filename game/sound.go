@@ -11,7 +11,7 @@ import (
 const (
 	sampleRate   = 44100
 	musicVolume  = 0.7
-	maxConcurrent = 4 // Max simultaneous plays of the same SFX
+	maxConcurrent = 8 // Max simultaneous plays of the same SFX
 )
 
 // SoundManager handles all audio: background music and sound effects.
