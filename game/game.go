@@ -246,6 +246,7 @@ func (g *Game) updatePlaying() {
 func (g *Game) updateWaveIntro() {
 	// Keep the game alive during wave intro — player can still move, particles animate, etc.
 	g.Player.Update()
+	g.Player.CheckWalls(g)
 	g.Player.SpawnThrustParticles(g)
 	g.Turret.Update(g)
 	updateProjectiles(g)
