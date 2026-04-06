@@ -16,12 +16,12 @@ No external assets — all graphics are procedural (vector shapes + Kage shaders
 
 Hit a wall too fast and you die. Touch an enemy and you die.
 
-## Build & Run
+## Install
 
 ```
-go run .
+go install github.com/perbu/dfender@latest
 ```
-
+It might take a minute or two to install.
 Requires Go 1.26+ and the Ebitengine dependencies for your platform (see [Ebitengine install guide](https://ebitengine.org/en/documents/install.html)).
 
 ## License
