@@ -156,10 +156,11 @@ func missileExplode(g *Game, x, y float64) {
 		if dx*dx+dy*dy < missileBlastRadSq {
 			e.Alive = false
 			g.Events = append(g.Events, Event{
-				Type:  EventEnemyKilled,
-				X:     e.X,
-				Y:     e.Y,
-				Value: float64(e.MaxHP) * 100,
+				Type:   EventEnemyKilled,
+				X:      e.X,
+				Y:      e.Y,
+				Value:  float64(e.MaxHP) * 100,
+				Silent: true,
 			})
 		}
 	}

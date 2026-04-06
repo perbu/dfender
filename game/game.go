@@ -208,7 +208,9 @@ func (g *Game) updatePlaying() {
 
 	// Drain events.
 	for _, e := range g.Events {
-		g.Sound.HandleEvent(e)
+		if !e.Silent {
+			g.Sound.HandleEvent(e)
+		}
 		switch e.Type {
 		case EventEnemyKilled:
 			g.Score.AddKill(int(e.Value))

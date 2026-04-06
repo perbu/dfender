@@ -11,7 +11,8 @@ import (
 const (
 	sampleRate   = 44100
 	musicVolume  = 0.7
-	maxConcurrent = 8 // Max simultaneous plays of the same SFX
+	maxConcurrent = 16  // Max simultaneous plays of the same SFX
+	sfxVolume     = 0.3 // Per-voice volume to prevent clipping when many play at once
 )
 
 // SoundManager handles all audio: background music and sound effects.
@@ -157,6 +158,7 @@ func (sm *SoundManager) play(buf *[]byte) {
 	}
 
 	p := sm.ctx.NewPlayerFromBytes(*buf)
+	p.SetVolume(sfxVolume)
 	p.Play()
 	sm.activePlayers[buf] = append(sm.activePlayers[buf], p)
 }
