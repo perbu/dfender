@@ -297,11 +297,12 @@ func sfxWallHit() []byte {
 	return GenerateSFX(SFXParams{
 		WaveType:    3, // Noise
 		AttackTime:  0.0,
-		SustainTime: 0.005,
-		DecayTime:   0.04,
-		BaseFreq:    250,
-		FreqSlide:   -200,
-		LPFCutoff:   0.3,
-		Volume:      0.1,
+		SustainTime: 0.002,
+		DecayTime:   0.012,
+		BaseFreq:    200,
+		FreqSlide:   -300,
+		LPFCutoff:   0.2,
+		Volume:      0.06,
 	})
 }
+

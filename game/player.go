@@ -29,6 +29,27 @@ func NewPlayer(x, y float64) Player {
 	return Player{X: x, Y: y, Alive: true}
 }
 
+// ThrusterCount returns how many thrust keys are held (0-4). Returns 0 if dead.
+func (p *Player) ThrusterCount() int {
+	if !p.Alive {
+		return 0
+	}
+	n := 0
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		n++
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyS) {
+		n++
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		n++
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
+		n++
+	}
+	return n
+}
+
 func (p *Player) Speed() float64 {
 	return math.Sqrt(p.VX*p.VX + p.VY*p.VY)
 }

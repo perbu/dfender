@@ -159,8 +159,10 @@ func (g *Game) Update() error {
 		g.Events = g.Events[:0]
 		g.updateWaveIntro()
 	case StateRespawn:
+		g.Sound.SetThruster(0)
 		g.updateRespawn()
 	case StateGameOver:
+		g.Sound.SetThruster(0)
 		// Decay screen shake (post-mortem).
 		if g.ShakeFrames > 0 {
 			g.ShakeFrames--
@@ -178,6 +180,7 @@ func (g *Game) updatePlaying() {
 	// Systems — order matters.
 	g.Player.Update()
 	g.Player.SpawnThrustParticles(g)
+	g.Sound.SetThruster(g.Player.ThrusterCount())
 	g.Turret.Update(g)
 	updateProjectiles(g)
 	updateEnemies(g)
@@ -248,6 +251,7 @@ func (g *Game) updateWaveIntro() {
 	g.Player.Update()
 	g.Player.CheckWalls(g)
 	g.Player.SpawnThrustParticles(g)
+	g.Sound.SetThruster(g.Player.ThrusterCount())
 	g.Turret.Update(g)
 	updateProjectiles(g)
 	updateParticles(g)

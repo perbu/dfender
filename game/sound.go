@@ -29,6 +29,10 @@ type SoundManager struct {
 	sfxPlayerDeath    []byte
 	sfxWallHit        []byte
 
+	// Streaming thruster engine sound
+	engine       *EngineSound
+	enginePlayer *audio.Player
+
 	// Track active players per SFX to limit polyphony
 	activePlayers map[*[]byte][]*audio.Player
 }
@@ -46,11 +50,39 @@ func NewSoundManager(musicData []byte) *SoundManager {
 		sfxWaveComplete:   sfxWaveComplete(),
 		sfxPlayerDeath:    sfxPlayerDeath(),
 		sfxWallHit:        sfxWallHit(),
+		engine:            NewEngineSound(),
 		activePlayers:     make(map[*[]byte][]*audio.Player),
 	}
 
+	sm.initEngine()
 	sm.initMusic(musicData)
 	return sm
+}
+
+func (sm *SoundManager) initEngine() {
+	p, err := sm.ctx.NewPlayer(sm.engine)
+	if err != nil {
+		log.Printf("sound: failed to create engine player: %v", err)
+		return
+	}
+	p.SetVolume(0)
+	p.Play()
+	sm.enginePlayer = p
+}
+
+// SetThruster adjusts the engine drone based on how many thrusters are active (0-4).
+func (sm *SoundManager) SetThruster(count int) {
+	if sm.enginePlayer == nil {
+		return
+	}
+	if count == 0 {
+		sm.enginePlayer.SetVolume(0)
+		return
+	}
+	// Shift fundamental higher with more thrusters: 110 → 180 Hz
+	freq := 110.0 + float64(count-1)*23.0
+	sm.engine.SetFreq(freq)
+	sm.enginePlayer.SetVolume(0.5)
 }
 
 func (sm *SoundManager) initMusic(musicData []byte) {
