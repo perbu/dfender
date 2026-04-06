@@ -24,8 +24,12 @@ func (w *WaveManager) NextWave() {
 }
 
 func (w *WaveManager) StartSpawning(g *Game) {
-	// Enemies per wave: 6 + 2*wave
-	w.SpawnQueue = 6 + 2*w.Number
+	// Enemies per wave: 6 + 2*wave, capped at wave 5 count (16).
+	count := 6 + 2*w.Number
+	if count > 16 {
+		count = 16
+	}
+	w.SpawnQueue = count
 	w.SpawnTimer = 0
 }
 

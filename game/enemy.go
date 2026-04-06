@@ -10,8 +10,8 @@ import (
 const (
 	EnemyRadius        = 22.0
 	EnemyBaseSpeed     = 1.5
-	EnemyTurnRateMin   = 0.03 // radians per frame (slow turner)
-	EnemyTurnRateMax   = 0.10 // radians per frame (sharp turner)
+	EnemyTurnRateMin   = 0.015 // radians per frame (slow turner)
+	EnemyTurnRateMax   = 0.12  // radians per frame (sharp turner)
 )
 
 type Enemy struct {
