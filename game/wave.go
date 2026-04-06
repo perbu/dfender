@@ -3,15 +3,16 @@ package game
 import "math/rand"
 
 const (
-	SpawnInterval = 20 // frames between each enemy spawn within a wave
+	SpawnWindowSeconds = 2.0 // all enemies in a wave spawn within this time
 )
 
 type WaveManager struct {
 	Number     int
 	IntroTick  int
-	SpawnQueue int // enemies left to spawn this wave
-	SpawnTimer int // frames until next spawn
-	GateIndex  int // round-robin gate selection
+	SpawnQueue    int // enemies left to spawn this wave
+	SpawnTimer    int // frames until next spawn
+	SpawnInterval int // frames between spawns (computed per wave)
+	GateIndex     int // round-robin gate selection
 }
 
 func NewWaveManager() WaveManager {
@@ -30,7 +31,9 @@ func (w *WaveManager) StartSpawning(g *Game) {
 		count = 16
 	}
 	w.SpawnQueue = count
+	// Distribute spawns evenly across the spawn window.
 	w.SpawnTimer = 0
+	w.SpawnInterval = int(SpawnWindowSeconds * 60 / float64(count))
 }
 
 func (w *WaveManager) Update(g *Game) {
@@ -38,7 +41,7 @@ func (w *WaveManager) Update(g *Game) {
 	if w.SpawnQueue > 0 {
 		w.SpawnTimer--
 		if w.SpawnTimer <= 0 {
-			w.SpawnTimer = SpawnInterval
+			w.SpawnTimer = w.SpawnInterval
 			w.spawnOne(g)
 			w.SpawnQueue--
 		}
