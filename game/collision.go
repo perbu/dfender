@@ -1,8 +1,10 @@
 package game
 
 const (
-	projEnemyRadSq   = (ProjectileRadius + EnemyRadius) * (ProjectileRadius + EnemyRadius)
-	playerEnemyRadSq = (PlayerRadius + EnemyRadius) * (PlayerRadius + EnemyRadius)
+	projEnemyRadSq      = (ProjectileRadius + EnemyRadius) * (ProjectileRadius + EnemyRadius)
+	playerEnemyRadSq    = (PlayerRadius + EnemyRadius) * (PlayerRadius + EnemyRadius)
+	playerPowerUpRadSq  = (PlayerRadius + PowerUpRadius) * (PlayerRadius + PowerUpRadius)
+	missileEnemyRadSq   = (MissileRadius + EnemyRadius) * (MissileRadius + EnemyRadius)
 )
 
 func checkCollisions(g *Game) {
@@ -45,6 +47,25 @@ func checkCollisions(g *Game) {
 		}
 	}
 
+	// PowerUp vs player — squared distance.
+	for i := range g.PowerUps {
+		pu := &g.PowerUps[i]
+		if pu.Life <= 0 {
+			continue
+		}
+		dx := g.Player.X - pu.X
+		dy := g.Player.Y - pu.Y
+		if dx*dx+dy*dy < playerPowerUpRadSq {
+			pu.Life = 0
+			g.Events = append(g.Events, Event{
+				Type:  EventPowerUpPickedUp,
+				X:     pu.X,
+				Y:     pu.Y,
+				Value: float64(pu.Type),
+			})
+		}
+	}
+
 	// Enemy vs player — squared distance (skip if invulnerable).
 	if g.Player.InvulnFrames > 0 {
 		return
@@ -57,6 +78,21 @@ func checkCollisions(g *Game) {
 		dx := g.Player.X - e.X
 		dy := g.Player.Y - e.Y
 		if dx*dx+dy*dy < playerEnemyRadSq {
+			// Shield absorbs the hit: enemy dies, shield consumed.
+			if g.PlayerPowerUps.Shield {
+				g.PlayerPowerUps.Shield = false
+				e.Alive = false
+				g.Events = append(g.Events, Event{
+					Type: EventShieldAbsorb, X: e.X, Y: e.Y,
+				})
+				g.Events = append(g.Events, Event{
+					Type:  EventEnemyKilled,
+					X:     e.X,
+					Y:     e.Y,
+					Value: float64(e.MaxHP) * 100,
+				})
+				break
+			}
 			g.Player.Alive = false
 			g.Events = append(g.Events, Event{
 				Type: EventPlayerDied, X: g.Player.X, Y: g.Player.Y,

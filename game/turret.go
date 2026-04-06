@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -11,6 +12,8 @@ const (
 	TurretRotSpeed   = math.Pi // radians per second → 180 deg/s
 	TurretLength     = 38.0
 	FireRate         = 6  // frames between shots (10/sec at 60fps)
+	GunsFireRate     = 3  // frames between shots with guns powerup
+	GunsSpread       = 0.08 // radians spread for double barrel
 	ProjectileSpeed  = 12.0
 	HeatPerShot      = 0.05  // ~2 sec to overheat at 10 rps
 	HeatDecay        = 0.004 // ~4 sec to cool from full
@@ -65,9 +68,22 @@ func (t *Turret) Update(g *Game) {
 		t.FireTimer--
 	}
 
+	// Missile firing (E key).
+	if inpututil.IsKeyJustPressed(ebiten.KeyE) && g.PlayerPowerUps.MissileCount > 0 {
+		g.PlayerPowerUps.MissileCount--
+		fireMissile(g)
+	}
+
+	// Determine fire rate based on guns buff.
+	rate := FireRate
+	gunsActive := g.PlayerPowerUps.GunsTimer > 0
+	if gunsActive {
+		rate = GunsFireRate
+	}
+
 	// Firing.
 	if ebiten.IsKeyPressed(ebiten.KeySpace) && t.FireTimer == 0 && t.Cooldown == 0 {
-		t.FireTimer = FireRate
+		t.FireTimer = rate
 		t.Heat += HeatPerShot
 		if t.Heat >= 1.0 {
 			t.Heat = 1.0
@@ -75,16 +91,31 @@ func (t *Turret) Update(g *Game) {
 			g.Events = append(g.Events, Event{Type: EventOverheat, X: g.Player.X, Y: g.Player.Y})
 			return
 		}
-		// Spawn projectile.
+		// Spawn projectile(s).
 		dx := math.Cos(t.Angle)
 		dy := math.Sin(t.Angle)
 		spawnX := g.Player.X + dx*TurretLength
 		spawnY := g.Player.Y + dy*TurretLength
-		g.Projectiles = append(g.Projectiles, Projectile{
-			X: spawnX, Y: spawnY,
-			VX: dx * ProjectileSpeed, VY: dy * ProjectileSpeed,
-			Alive: true,
-		})
+
+		if gunsActive {
+			// Double barrel: two projectiles with spread.
+			for _, offset := range []float64{-GunsSpread, GunsSpread} {
+				a := t.Angle + offset
+				pdx := math.Cos(a)
+				pdy := math.Sin(a)
+				g.Projectiles = append(g.Projectiles, Projectile{
+					X: spawnX, Y: spawnY,
+					VX: pdx * ProjectileSpeed, VY: pdy * ProjectileSpeed,
+					Alive: true,
+				})
+			}
+		} else {
+			g.Projectiles = append(g.Projectiles, Projectile{
+				X: spawnX, Y: spawnY,
+				VX: dx * ProjectileSpeed, VY: dy * ProjectileSpeed,
+				Alive: true,
+			})
+		}
 		g.Events = append(g.Events, Event{Type: EventFired, X: spawnX, Y: spawnY})
 	}
 }

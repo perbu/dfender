@@ -28,6 +28,9 @@ type SoundManager struct {
 	sfxWaveComplete   []byte
 	sfxPlayerDeath    []byte
 	sfxWallHit        []byte
+	sfxPickup         []byte
+	sfxShieldAbsorb   []byte
+	sfxMissileLaunch  []byte
 
 	// Streaming thruster engine sound
 	engine       *EngineSound
@@ -50,6 +53,9 @@ func NewSoundManager(musicData []byte) *SoundManager {
 		sfxWaveComplete:   sfxWaveComplete(),
 		sfxPlayerDeath:    sfxPlayerDeath(),
 		sfxWallHit:        sfxWallHit(),
+		sfxPickup:         sfxPickup(),
+		sfxShieldAbsorb:   sfxShieldAbsorb(),
+		sfxMissileLaunch:  sfxMissileLaunch(),
 		engine:            NewEngineSound(),
 		activePlayers:     make(map[*[]byte][]*audio.Player),
 	}
@@ -174,5 +180,13 @@ func (sm *SoundManager) HandleEvent(e Event) {
 		sm.play(&sm.sfxWallHit)
 	case EventFired:
 		sm.play(&sm.sfxLaser)
+	case EventPowerUpPickedUp:
+		sm.play(&sm.sfxPickup)
+	case EventShieldAbsorb:
+		sm.play(&sm.sfxShieldAbsorb)
+	case EventMissileFired:
+		sm.play(&sm.sfxMissileLaunch)
+	case EventMissileWallHit:
+		sm.play(&sm.sfxExplosion)
 	}
 }

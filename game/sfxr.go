@@ -306,3 +306,41 @@ func sfxWallHit() []byte {
 	})
 }
 
+func sfxPickup() []byte {
+	return GenerateSFX(SFXParams{
+		WaveType:    2, // Sine — clean rising chime
+		AttackTime:  0.0,
+		SustainTime: 0.05,
+		DecayTime:   0.15,
+		BaseFreq:    500,
+		FreqSlide:   1200,
+		Volume:      0.25,
+	})
+}
+
+func sfxShieldAbsorb() []byte {
+	return GenerateSFX(SFXParams{
+		WaveType:    0, // Square — metallic ping
+		AttackTime:  0.0,
+		SustainTime: 0.03,
+		DecayTime:   0.2,
+		BaseFreq:    800,
+		FreqSlide:   -400,
+		LPFCutoff:   0.5,
+		Volume:      0.3,
+	})
+}
+
+func sfxMissileLaunch() []byte {
+	return GenerateSFX(SFXParams{
+		WaveType:    3, // Noise — whoosh
+		AttackTime:  0.01,
+		SustainTime: 0.08,
+		DecayTime:   0.15,
+		BaseFreq:    400,
+		FreqSlide:   600,
+		LPFCutoff:   0.35,
+		Volume:      0.25,
+	})
+}
+

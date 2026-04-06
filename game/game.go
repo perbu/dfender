@@ -78,6 +78,11 @@ type Game struct {
 	// Score
 	Score ScoreTracker
 
+	// Power-ups
+	PowerUps       []PowerUp
+	Missiles       []Missile
+	PlayerPowerUps PlayerPowerUps
+
 	// Events (cleared each frame)
 	Events []Event
 
@@ -131,6 +136,9 @@ func (g *Game) reset() {
 	}
 	g.Wave = NewWaveManager()
 	g.Score = ScoreTracker{}
+	g.PowerUps = g.PowerUps[:0]
+	g.Missiles = g.Missiles[:0]
+	g.PlayerPowerUps = PlayerPowerUps{}
 	g.Lives = StartingLives
 	g.RespawnTimer = 0
 	g.ShakeFrames = 0
@@ -143,6 +151,11 @@ func (g *Game) Update() error {
 	// Global key: toggle music.
 	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
 		g.Sound.ToggleMusic()
+	}
+
+	// Tick guns timer (shared across playing states).
+	if g.PlayerPowerUps.GunsTimer > 0 {
+		g.PlayerPowerUps.GunsTimer--
 	}
 
 	switch g.State {
@@ -185,7 +198,10 @@ func (g *Game) updatePlaying() {
 	updateProjectiles(g)
 	updateEnemies(g)
 	spawnEnemyThrustParticles(g)
+	updatePowerUps(g)
+	updateMissiles(g)
 	checkCollisions(g)
+	checkMissileCollisions(g)
 	g.Score.Update()
 	g.Wave.Update(g)
 	updateParticles(g)
@@ -197,6 +213,7 @@ func (g *Game) updatePlaying() {
 		case EventEnemyKilled:
 			g.Score.AddKill(int(e.Value))
 			spawnExplosion(g, e.X, e.Y, ColorEnemy, 20)
+			spawnPowerUpDrop(g, e.X, e.Y, g.Wave.Number)
 		case EventEnemyHit:
 			spawnExplosion(g, e.X, e.Y, ColorUI, 5)
 		case EventPlayerDied:
@@ -237,6 +254,30 @@ func (g *Game) updatePlaying() {
 			spawnExplosion(g, e.X, e.Y, ColorHeatHot, 10)
 		case EventProjectileWallHit:
 			spawnExplosion(g, e.X, e.Y, ColorProjectile, 12)
+		case EventPowerUpPickedUp:
+			puType := PowerUpType(int(e.Value))
+			switch puType {
+			case PowerUpShield:
+				g.PlayerPowerUps.Shield = true
+			case PowerUpGuns:
+				g.PlayerPowerUps.GunsTimer = GunsBuffDuration
+			case PowerUpMissile:
+				if g.PlayerPowerUps.MissileCount < MissileMaxCount {
+					g.PlayerPowerUps.MissileCount++
+				}
+			}
+			spawnExplosion(g, e.X, e.Y, ColorBorder, 15)
+		case EventMissileWallHit:
+			spawnExplosion(g, e.X, e.Y, ColorHeatHot, 20)
+			g.ShakeFrames = 8
+			g.ShakeAmount = 4
+		case EventShieldAbsorb:
+			spawnExplosion(g, e.X, e.Y, ColorBorder, 30)
+			g.ShakeFrames = 10
+			g.ShakeAmount = 5
+		case EventMissileFired:
+			// Particle burst at launch point.
+			spawnExplosion(g, e.X, e.Y, ColorHeatHot, 8)
 		}
 	}
 
@@ -254,6 +295,7 @@ func (g *Game) updateWaveIntro() {
 	g.Sound.SetThruster(g.Player.ThrusterCount())
 	g.Turret.Update(g)
 	updateProjectiles(g)
+	updatePowerUps(g)
 	updateParticles(g)
 
 	g.Wave.IntroTick++
@@ -331,9 +373,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// Game objects.
 	drawParticles(s.SceneImage, g, ox, oy)
+	drawPowerUps(s.SceneImage, g, ox, oy)
 	drawProjectiles(s.SceneImage, g, ox, oy)
+	drawMissiles(s.SceneImage, g, ox, oy)
 	drawEnemies(s.SceneImage, g, ox, oy)
 	g.Player.Draw(s.SceneImage, ox, oy, g.Turret.Heat)
+	drawShieldOverlay(s.SceneImage, g, ox, oy)
 	g.Turret.Draw(s.SceneImage, g, ox, oy)
 
 	// --- Post-processing ---

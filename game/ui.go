@@ -33,6 +33,9 @@ func drawUI(screen *ebiten.Image, g *Game) {
 	// Heat bar — below lives.
 	drawHeatBar(screen, g)
 
+	// Power-up indicators — below heat bar.
+	drawPowerUpHUD(screen, g)
+
 	// Game over.
 	if g.State == StateGameOver {
 		cy := float64(ScreenHeight)/2 - 80
@@ -49,6 +52,26 @@ func drawUI(screen *ebiten.Image, g *Game) {
 
 	// FPS (keep debug font — it's a debug readout).
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("FPS: %.0f", ebiten.ActualFPS()), 10, 10)
+}
+
+func drawPowerUpHUD(screen *ebiten.Image, g *Game) {
+	baseX := float64(ScreenWidth - 170)
+	baseY := float64(95)
+
+	if g.PlayerPowerUps.Shield {
+		drawTextAt(screen, "SHIELD", FontHUD, baseX, baseY, ColorBorder)
+		baseY += 20
+	}
+
+	if g.PlayerPowerUps.GunsTimer > 0 {
+		secs := g.PlayerPowerUps.GunsTimer / 60
+		drawTextAt(screen, fmt.Sprintf("GUNS %ds", secs), FontHUD, baseX, baseY, ColorPlayer)
+		baseY += 20
+	}
+
+	if g.PlayerPowerUps.MissileCount > 0 {
+		drawTextAt(screen, fmt.Sprintf("MSL x%d [E]", g.PlayerPowerUps.MissileCount), FontHUD, baseX, baseY, ColorHeatHot)
+	}
 }
 
 func drawHeatBar(screen *ebiten.Image, g *Game) {
