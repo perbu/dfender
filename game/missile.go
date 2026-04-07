@@ -265,7 +265,7 @@ func drawMissiles(screen *ebiten.Image, g *Game, ox, oy float64) {
 		glowR := (MissileRadius + 4) * glowPulse
 		glowCol := colorBlastOuter
 		glowCol.A = 0x55
-		vector.DrawFilledCircle(screen, cx, cy, glowR, glowCol, false)
+		vector.DrawFilledCircle(screen, cx, cy, glowR, glowCol, AntiAlias)
 
 		noseLen := float32(MissileRadius * 1.6)
 		bodyW := float32(MissileRadius * 0.5)
@@ -325,7 +325,7 @@ func drawMissiles(screen *ebiten.Image, g *Game, ox, oy float64) {
 			if f == 0 {
 				col = colorBlastInner
 			}
-			vector.DrawFilledCircle(screen, fx, fy, fSize, col, false)
+			vector.DrawFilledCircle(screen, fx, fy, fSize, col, AntiAlias)
 		}
 	}
 }

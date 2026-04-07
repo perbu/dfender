@@ -57,12 +57,12 @@ func drawProjectiles(screen *ebiten.Image, g *Game, ox, oy float64) {
 		cx := float32(p.X + ox)
 		cy := float32(p.Y + oy)
 		// Outer glow.
-		vector.DrawFilledCircle(screen, cx, cy, ProjectileRadius+3, ColorHeatCool, false)
+		vector.DrawFilledCircle(screen, cx, cy, ProjectileRadius+3, ColorHeatCool, AntiAlias)
 		// Bright core.
-		vector.DrawFilledCircle(screen, cx, cy, ProjectileRadius, ColorProjectile, false)
+		vector.DrawFilledCircle(screen, cx, cy, ProjectileRadius, ColorProjectile, AntiAlias)
 		// Trail — thicker line behind.
 		tx := float32(p.X - p.VX*0.8 + ox)
 		ty := float32(p.Y - p.VY*0.8 + oy)
-		vector.StrokeLine(screen, cx, cy, tx, ty, 4, ColorHeatCool, false)
+		vector.StrokeLine(screen, cx, cy, tx, ty, 4, ColorHeatCool, AntiAlias)
 	}
 }

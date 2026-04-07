@@ -507,23 +507,23 @@ func drawArena(screen *ebiten.Image, g *Game, ox, oy float64) {
 	// Draw border segments, leaving gaps for gates.
 	// Top edge (north gate)
 	gc := float32(gates[0].X + ox)
-	vector.StrokeLine(screen, l, t, gc-hw, t, w, ColorBorder, false)
-	vector.StrokeLine(screen, gc+hw, t, r, t, w, ColorBorder, false)
+	vector.StrokeLine(screen, l, t, gc-hw, t, w, ColorBorder, AntiAlias)
+	vector.StrokeLine(screen, gc+hw, t, r, t, w, ColorBorder, AntiAlias)
 
 	// Bottom edge (south gate)
 	gc = float32(gates[1].X + ox)
-	vector.StrokeLine(screen, l, b, gc-hw, b, w, ColorBorder, false)
-	vector.StrokeLine(screen, gc+hw, b, r, b, w, ColorBorder, false)
+	vector.StrokeLine(screen, l, b, gc-hw, b, w, ColorBorder, AntiAlias)
+	vector.StrokeLine(screen, gc+hw, b, r, b, w, ColorBorder, AntiAlias)
 
 	// Left edge (west gate)
 	gc = float32(gates[2].Y + oy)
-	vector.StrokeLine(screen, l, t, l, gc-hw, w, ColorBorder, false)
-	vector.StrokeLine(screen, l, gc+hw, l, b, w, ColorBorder, false)
+	vector.StrokeLine(screen, l, t, l, gc-hw, w, ColorBorder, AntiAlias)
+	vector.StrokeLine(screen, l, gc+hw, l, b, w, ColorBorder, AntiAlias)
 
 	// Right edge (east gate)
 	gc = float32(gates[3].Y + oy)
-	vector.StrokeLine(screen, r, t, r, gc-hw, w, ColorBorder, false)
-	vector.StrokeLine(screen, r, gc+hw, r, b, w, ColorBorder, false)
+	vector.StrokeLine(screen, r, t, r, gc-hw, w, ColorBorder, AntiAlias)
+	vector.StrokeLine(screen, r, gc+hw, r, b, w, ColorBorder, AntiAlias)
 
 	// Gate markers are now drawn by the gate shader.
 }

@@ -77,18 +77,18 @@ func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 	borderInset := float32(60)
 	bw := float32(ScreenWidth) - borderInset*2
 	bh := float32(ScreenHeight) - borderInset*2
-	vector.StrokeRect(s.SceneImage, borderInset, borderInset, bw, bh, 2, ColorBorder, false)
+	vector.StrokeRect(s.SceneImage, borderInset, borderInset, bw, bh, 2, ColorBorder, AntiAlias)
 
 	// Corner accents — small diagonal lines at each corner.
 	accent := float32(20)
 	// Top-left
-	vector.StrokeLine(s.SceneImage, borderInset, borderInset+accent, borderInset+accent, borderInset, 2, ColorBorder, false)
+	vector.StrokeLine(s.SceneImage, borderInset, borderInset+accent, borderInset+accent, borderInset, 2, ColorBorder, AntiAlias)
 	// Top-right
-	vector.StrokeLine(s.SceneImage, float32(ScreenWidth)-borderInset-accent, borderInset, float32(ScreenWidth)-borderInset, borderInset+accent, 2, ColorBorder, false)
+	vector.StrokeLine(s.SceneImage, float32(ScreenWidth)-borderInset-accent, borderInset, float32(ScreenWidth)-borderInset, borderInset+accent, 2, ColorBorder, AntiAlias)
 	// Bottom-left
-	vector.StrokeLine(s.SceneImage, borderInset, float32(ScreenHeight)-borderInset-accent, borderInset+accent, float32(ScreenHeight)-borderInset, 2, ColorBorder, false)
+	vector.StrokeLine(s.SceneImage, borderInset, float32(ScreenHeight)-borderInset-accent, borderInset+accent, float32(ScreenHeight)-borderInset, 2, ColorBorder, AntiAlias)
 	// Bottom-right
-	vector.StrokeLine(s.SceneImage, float32(ScreenWidth)-borderInset-accent, float32(ScreenHeight)-borderInset, float32(ScreenWidth)-borderInset, float32(ScreenHeight)-borderInset-accent, 2, ColorBorder, false)
+	vector.StrokeLine(s.SceneImage, float32(ScreenWidth)-borderInset-accent, float32(ScreenHeight)-borderInset, float32(ScreenWidth)-borderInset, float32(ScreenHeight)-borderInset-accent, 2, ColorBorder, AntiAlias)
 
 	// Draw showcase enemies into scene (before bloom).
 	if g.State == StateMenu {

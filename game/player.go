@@ -169,10 +169,10 @@ func (p *Player) Draw(screen *ebiten.Image, ox, oy float64, heat float64) {
 	shipColor := lerpColor(ColorPlayer, ColorHeatHot, float32(heat))
 
 	// Outer glow ring (dimmer, larger).
-	vector.StrokeCircle(screen, cx, cy, r+4, 6, ColorBorderDim, false)
+	vector.StrokeCircle(screen, cx, cy, r+4, 6, ColorBorderDim, AntiAlias)
 
 	drawPolygon(screen, cx, cy, r, 6, -math.Pi/2, 4, shipColor)
 
 	// Inner dot.
-	vector.DrawFilledCircle(screen, cx, cy, 5, shipColor, false)
+	vector.DrawFilledCircle(screen, cx, cy, 5, shipColor, AntiAlias)
 }

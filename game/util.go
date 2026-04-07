@@ -8,6 +8,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+// AntiAlias controls whether vector drawing uses anti-aliasing.
+const AntiAlias = true
+
 // drawPolygon draws a regular polygon outline.
 func drawPolygon(screen *ebiten.Image, cx, cy, radius float32, sides int, startAngle float64, thickness float32, col color.RGBA) {
 	for i := 0; i < sides; i++ {
@@ -17,7 +20,7 @@ func drawPolygon(screen *ebiten.Image, cx, cy, radius float32, sides int, startA
 		y1 := cy + radius*float32(math.Sin(a1))
 		x2 := cx + radius*float32(math.Cos(a2))
 		y2 := cy + radius*float32(math.Sin(a2))
-		vector.StrokeLine(screen, x1, y1, x2, y2, thickness, col, false)
+		vector.StrokeLine(screen, x1, y1, x2, y2, thickness, col, AntiAlias)
 	}
 }
 

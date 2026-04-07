@@ -11,8 +11,8 @@ import (
 
 // drawEnemyShape draws a single enemy: shield ring, inner body, outer triangle.
 func drawEnemyShape(screen *ebiten.Image, cx, cy, r float32, angle float64, shieldCol, innerCol color.RGBA) {
-	vector.StrokeCircle(screen, cx, cy, r+3, 4, shieldCol, false)
-	vector.DrawFilledCircle(screen, cx, cy, r*0.55, innerCol, false)
+	vector.StrokeCircle(screen, cx, cy, r+3, 4, shieldCol, AntiAlias)
+	vector.DrawFilledCircle(screen, cx, cy, r*0.55, innerCol, AntiAlias)
 	drawPolygon(screen, cx, cy, r, 3, angle, 2, shieldCol)
 }
 

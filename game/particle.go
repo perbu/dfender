@@ -102,6 +102,6 @@ func drawParticles(screen *ebiten.Image, g *Game, ox, oy float64) {
 		col.A = uint8(float32(col.A) * alpha)
 		cx := float32(p.X + ox)
 		cy := float32(p.Y + oy)
-		vector.DrawFilledCircle(screen, cx, cy, p.Size*alpha, col, false)
+		vector.DrawFilledCircle(screen, cx, cy, p.Size*alpha, col, AntiAlias)
 	}
 }

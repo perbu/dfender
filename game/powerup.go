@@ -100,13 +100,13 @@ func drawPowerUps(screen *ebiten.Image, g *Game, ox, oy float64) {
 		}
 
 		// Outer glow.
-		vector.StrokeCircle(screen, cx, cy, r+4, 2, col, false)
+		vector.StrokeCircle(screen, cx, cy, r+4, 2, col, AntiAlias)
 
 		// Shape.
 		drawPolygon(screen, cx, cy, r, sides, pu.Rotation, 3, col)
 
 		// Inner dot.
-		vector.DrawFilledCircle(screen, cx, cy, 4, col, false)
+		vector.DrawFilledCircle(screen, cx, cy, 4, col, AntiAlias)
 	}
 }
 

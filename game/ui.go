@@ -91,15 +91,15 @@ func drawHeatBar(screen *ebiten.Image, g *Game) {
 	barY := float32(78)
 
 	// Background.
-	vector.DrawFilledRect(screen, barX, barY, barW, barH, color.RGBA{0x1A, 0x1A, 0x2E, 0xFF}, false)
+	vector.DrawFilledRect(screen, barX, barY, barW, barH, color.RGBA{0x1A, 0x1A, 0x2E, 0xFF}, AntiAlias)
 
 	// Fill.
 	heat := float32(g.Turret.Heat)
 	fillColor := lerpColor(ColorHeatCool, ColorHeatHot, heat)
-	vector.DrawFilledRect(screen, barX, barY, barW*heat, barH, fillColor, false)
+	vector.DrawFilledRect(screen, barX, barY, barW*heat, barH, fillColor, AntiAlias)
 
 	// Border.
-	vector.StrokeRect(screen, barX, barY, barW, barH, 1, ColorBorderDim, false)
+	vector.StrokeRect(screen, barX, barY, barW, barH, 1, ColorBorderDim, AntiAlias)
 
 	// Label if overheated — to the left of the bar so it doesn't overlap lives.
 	if g.Turret.Cooldown > 0 {

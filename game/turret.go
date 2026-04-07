@@ -137,15 +137,15 @@ func (t *Turret) Draw(screen *ebiten.Image, g *Game, ox, oy float64) {
 
 	// Color shifts with heat.
 	barrelColor := lerpColor(ColorPlayer, ColorHeatHot, float32(t.Heat))
-	vector.StrokeLine(screen, cx, cy, endX, endY, 5, barrelColor, false)
+	vector.StrokeLine(screen, cx, cy, endX, endY, 5, barrelColor, AntiAlias)
 
 	// Muzzle dot.
-	vector.DrawFilledCircle(screen, endX, endY, 5, barrelColor, false)
+	vector.DrawFilledCircle(screen, endX, endY, 5, barrelColor, AntiAlias)
 
 	// Aim line (subtle).
 	aimLen := float32(60.0)
 	aimEndX := endX + dx*aimLen
 	aimEndY := endY + dy*aimLen
 	aimColor := ColorBorderDim
-	vector.StrokeLine(screen, endX, endY, aimEndX, aimEndY, 1, aimColor, false)
+	vector.StrokeLine(screen, endX, endY, aimEndX, aimEndY, 1, aimColor, AntiAlias)
 }
