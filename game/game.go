@@ -33,6 +33,7 @@ var (
 	ColorUI         = color.RGBA{0xF0, 0xE6, 0xD3, 0xFF}
 	ColorHeatCool   = color.RGBA{0xD4, 0xA8, 0x43, 0xFF}
 	ColorHeatHot    = color.RGBA{0xFF, 0x33, 0x33, 0xFF}
+	ColorShield     = color.RGBA{0x33, 0xDD, 0x55, 0xFF} // green for shield powerup
 
 	// Enemy inner colors (by type).
 	ColorEnemyNormal = color.RGBA{0x66, 0x66, 0x77, 0xFF} // muted gray (won't blow out under bloom)

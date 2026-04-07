@@ -89,7 +89,7 @@ func drawPowerUps(screen *ebiten.Image, g *Game, ox, oy float64) {
 
 		switch pu.Type {
 		case PowerUpShield:
-			col = ColorBorder  // gold
+			col = ColorShield  // green
 			sides = 6          // hexagon
 		case PowerUpGuns:
 			col = ColorPlayer  // amber
@@ -124,7 +124,8 @@ func drawShieldOverlay(screen *ebiten.Image, g *Game, ox, oy float64) {
 	r := float32(PlayerRadius + 10)
 	// Slow pulse.
 	pulse := float32(0.5 + 0.5*math.Sin(float64(g.Tick)*0.08))
-	col := lerpColor(ColorBorderDim, ColorBorder, pulse)
+	dimShield := color.RGBA{0x1A, 0x6E, 0x2A, 0xFF}
+	col := lerpColor(dimShield, ColorShield, pulse)
 	drawPolygon(screen, cx, cy, r, 6, float64(g.Tick)*0.02, 2, col)
 }
 

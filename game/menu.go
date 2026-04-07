@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -90,9 +91,10 @@ func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 	// Bottom-right
 	vector.StrokeLine(s.SceneImage, float32(ScreenWidth)-borderInset-accent, float32(ScreenHeight)-borderInset, float32(ScreenWidth)-borderInset, float32(ScreenHeight)-borderInset-accent, 2, ColorBorder, AntiAlias)
 
-	// Draw showcase enemies into scene (before bloom).
+	// Draw showcase enemies and powerups into scene (before bloom).
 	if g.State == StateMenu {
 		drawMenuEnemies(s.SceneImage, g.Tick)
+		drawMenuPowerUps(s.SceneImage, g.Tick)
 	}
 
 	// Bloom the scene.
@@ -127,8 +129,7 @@ func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 		drawTextCentered(screen, label, FontMenu, y, clr)
 	}
 
-	// Nav hint.
-	drawTextCentered(screen, "W/S or ARROWS to navigate  —  ENTER to select", FontMenuSmall, float64(ScreenHeight)-120, ColorBorderDim)
+
 }
 
 type menuEnemy struct {
@@ -157,7 +158,7 @@ func drawMenuEnemies(screen *ebiten.Image, tick uint64) {
 		initMenuEnemies()
 	}
 
-	cy := float32(ScreenHeight) - 220
+	cy := float32(ScreenHeight) - 300
 	r := float32(EnemyRadius) * 1.3
 	angle := float64(tick) * 0.02
 
@@ -165,6 +166,47 @@ func drawMenuEnemies(screen *ebiten.Image, tick uint64) {
 		drawEnemyShape(screen, item.cx, cy, r, angle, ColorEnemy, item.innerCol)
 		drawTextAt(screen, item.label, FontMenuSmall,
 			float64(item.cx)-item.labelW/2, float64(cy+r+16), item.innerCol)
+	}
+}
+
+type menuPowerUp struct {
+	label string
+	col   color.RGBA
+	sides int
+	cx    float32
+	labelW float64
+}
+
+var menuPowerUps []menuPowerUp
+
+func initMenuPowerUps() {
+	menuPowerUps = []menuPowerUp{
+		{"SHIELD", ColorShield, 6, float32(ScreenWidth)/2 - 200, 0},
+		{"GUNS", ColorPlayer, 5, float32(ScreenWidth) / 2, 0},
+		{"MISSILE", ColorHeatHot, 4, float32(ScreenWidth)/2 + 200, 0},
+	}
+	for i := range menuPowerUps {
+		menuPowerUps[i].labelW, _ = text.Measure(menuPowerUps[i].label, FontMenuSmall, 0)
+	}
+}
+
+func drawMenuPowerUps(screen *ebiten.Image, tick uint64) {
+	if menuPowerUps == nil {
+		initMenuPowerUps()
+	}
+
+	cy := float32(ScreenHeight) - 180
+	r := float32(PowerUpRadius) * 1.3
+	angle := float64(tick) * PowerUpRotSpeed
+	bob := math.Sin(float64(tick)*PowerUpBobSpeed) * PowerUpBobAmount
+
+	for _, item := range menuPowerUps {
+		py := cy + float32(bob)
+		vector.StrokeCircle(screen, item.cx, py, r+4, 2, item.col, AntiAlias)
+		drawPolygon(screen, item.cx, py, r, item.sides, angle, 3, item.col)
+		vector.DrawFilledCircle(screen, item.cx, py, 4, item.col, AntiAlias)
+		drawTextAt(screen, item.label, FontMenuSmall,
+			float64(item.cx)-item.labelW/2, float64(py+r+16), item.col)
 	}
 }
 
