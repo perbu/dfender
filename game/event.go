@@ -19,6 +19,8 @@ const (
 	EventShieldAbsorb
 	EventEnemyWallDeath
 	EventOverheatWarning
+	EventMinePlaced
+	EventMineExploded
 )
 
 // Event is a value type describing something that happened this frame.

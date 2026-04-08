@@ -76,6 +76,12 @@ func (t *Turret) Update(g *Game) {
 		fireMissile(g)
 	}
 
+	// Mine deployment (Q key).
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) && g.PlayerPowerUps.MineCount > 0 {
+		g.PlayerPowerUps.MineCount--
+		deployMine(g)
+	}
+
 	// Determine fire rate based on guns buff.
 	rate := FireRate
 	gunsActive := g.PlayerPowerUps.GunsTimer > 0

@@ -16,6 +16,7 @@ const (
 	PowerUpGuns
 	PowerUpMissile
 	PowerUpSupercool
+	PowerUpMine
 	PowerUpCount // must be last — used for random selection
 )
 
@@ -23,7 +24,7 @@ const (
 	PowerUpRadius     = 18.0
 	PowerUpLifetime   = 600 // 10s at 60fps
 	PowerUpBlinkStart = 180 // last 3s
-	PowerUpDropChance = 0.20
+	PowerUpDropChance = 0.30
 	PowerUpRotSpeed   = 0.03 // radians/frame
 	PowerUpBobSpeed   = 0.05 // bob animation speed
 	PowerUpBobAmount  = 3.0  // bob amplitude in pixels
@@ -37,6 +38,7 @@ type PlayerPowerUps struct {
 	Shield        bool
 	GunsTimer     int // frames remaining (0 = inactive)
 	MissileCount  int
+	MineCount     int
 	SupercoolTimer int // frames remaining (0 = inactive)
 }
 
@@ -105,6 +107,9 @@ func drawPowerUps(screen *ebiten.Image, g *Game, ox, oy float64) {
 		case PowerUpSupercool:
 			col = ColorSupercool // blue
 			sides = 7            // heptagon
+		case PowerUpMine:
+			col = ColorMine // orange
+			sides = 8       // octagon
 		}
 
 		// Outer glow.

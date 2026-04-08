@@ -7,6 +7,29 @@ const (
 	missileEnemyRadSq   = (MissileRadius + EnemyRadius) * (MissileRadius + EnemyRadius)
 )
 
+// aoeExplode kills all enemies within radiusSq of (x,y) and emits evt.
+func aoeExplode(g *Game, x, y, radiusSq float64, evt EventType) {
+	for i := range g.Enemies {
+		e := &g.Enemies[i]
+		if !e.Alive {
+			continue
+		}
+		dx := x - e.X
+		dy := y - e.Y
+		if dx*dx+dy*dy < radiusSq {
+			e.Alive = false
+			g.Events = append(g.Events, Event{
+				Type:   EventEnemyKilled,
+				X:      e.X,
+				Y:      e.Y,
+				Value:  float64(e.MaxHP) * 100,
+				Silent: true,
+			})
+		}
+	}
+	g.Events = append(g.Events, Event{Type: evt, X: x, Y: y})
+}
+
 func checkCollisions(g *Game) {
 	if !g.Player.Alive || g.State == StateRespawn {
 		return

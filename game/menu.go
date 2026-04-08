@@ -185,6 +185,7 @@ func initMenuPowerUps() {
 		{"GUNS", ColorPlayer, 5, 0, 0},
 		{"MISSILE", ColorHeatHot, 4, 0, 0},
 		{"COOL", ColorSupercool, 7, 0, 0},
+		{"MINE", ColorMine, 8, 0, 0},
 	}
 	spacing := float32(200)
 	startX := float32(ScreenWidth)/2 - spacing*float32(len(menuPowerUps)-1)/2

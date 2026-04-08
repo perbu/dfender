@@ -372,3 +372,29 @@ func sfxMissileExplode() []byte {
 	})
 }
 
+func sfxMinePlaced() []byte {
+	return GenerateSFX(SFXParams{
+		WaveType:    2, // Sine — short clunk
+		AttackTime:  0.0,
+		SustainTime: 0.03,
+		DecayTime:   0.08,
+		BaseFreq:    300,
+		FreqSlide:   -500,
+		FreqLimit:   80,
+		Volume:      0.2,
+	})
+}
+
+func sfxMineExplode() []byte {
+	return GenerateSFX(SFXParams{
+		WaveType:    2, // Sine — deep heavy boom, bigger than missile
+		AttackTime:  0.0,
+		SustainTime: 0.12,
+		DecayTime:   0.4,
+		BaseFreq:    120,
+		FreqSlide:   -350,
+		FreqLimit:   20,
+		Volume:      0.35,
+	})
+}
+

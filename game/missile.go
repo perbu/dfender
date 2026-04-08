@@ -25,7 +25,7 @@ var (
 	colorMissileNose  = color.RGBA{0xFF, 0xCC, 0x33, 0xFF} // bright gold nose
 	colorMissileBody  = color.RGBA{0xFF, 0x55, 0x22, 0xFF} // orange-red body
 	colorMissileFlame = color.RGBA{0xFF, 0x88, 0x00, 0xFF} // orange flame
-	colorMissileSmoke = color.RGBA{0x99, 0x77, 0x55, 0xCC} // brownish smoke trail
+	colorMissileSmoke = ColorSmoke
 	colorBlastInner   = color.RGBA{0xFF, 0xFF, 0xDD, 0xFF} // white-hot center
 	colorBlastOuter   = color.RGBA{0xFF, 0x66, 0x00, 0xFF} // orange ring
 )
@@ -144,30 +144,8 @@ func checkMissileCollisions(g *Game) {
 	}
 }
 
-// missileExplode kills all enemies in blast radius and emits the explosion event.
 func missileExplode(g *Game, x, y float64) {
-	for i := range g.Enemies {
-		e := &g.Enemies[i]
-		if !e.Alive {
-			continue
-		}
-		dx := x - e.X
-		dy := y - e.Y
-		if dx*dx+dy*dy < missileBlastRadSq {
-			e.Alive = false
-			g.Events = append(g.Events, Event{
-				Type:   EventEnemyKilled,
-				X:      e.X,
-				Y:      e.Y,
-				Value:  float64(e.MaxHP) * 100,
-				Silent: true,
-			})
-		}
-	}
-
-	g.Events = append(g.Events, Event{
-		Type: EventMissileExploded, X: x, Y: y,
-	})
+	aoeExplode(g, x, y, missileBlastRadSq, EventMissileExploded)
 }
 
 func fireMissile(g *Game) {

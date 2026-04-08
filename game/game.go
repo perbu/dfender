@@ -35,6 +35,8 @@ var (
 	ColorHeatHot    = color.RGBA{0xFF, 0x33, 0x33, 0xFF}
 	ColorShield     = color.RGBA{0x33, 0xDD, 0x55, 0xFF} // green for shield powerup
 	ColorSupercool  = color.RGBA{0x44, 0xBB, 0xFF, 0xFF} // blue for supercooling powerup
+	ColorMine       = color.RGBA{0xFF, 0x99, 0x00, 0xFF} // orange for mine powerup
+	ColorSmoke      = color.RGBA{0x99, 0x77, 0x55, 0xCC} // brownish smoke (explosions/trails)
 
 	// Enemy inner colors (by type).
 	ColorEnemyNormal = color.RGBA{0x66, 0x66, 0x77, 0xFF} // muted gray (won't blow out under bloom)
@@ -90,6 +92,7 @@ type Game struct {
 	// Power-ups
 	PowerUps       []PowerUp
 	Missiles       []Missile
+	Mines          []Mine
 	PlayerPowerUps PlayerPowerUps
 
 	// Events (cleared each frame)
@@ -151,6 +154,7 @@ func (g *Game) reset() {
 	g.Score = ScoreTracker{}
 	g.PowerUps = g.PowerUps[:0]
 	g.Missiles = g.Missiles[:0]
+	g.Mines = g.Mines[:0]
 	g.PlayerPowerUps = PlayerPowerUps{}
 	g.Lives = StartingLives
 	g.RespawnTimer = 0
@@ -217,6 +221,8 @@ func (g *Game) Update() error {
 				spawnExplosion(g, e.X, e.Y, ColorHeatHot, 15)
 			case EventPowerUpPickedUp:
 				g.applyPowerUp(e)
+			case EventMinePlaced:
+				spawnMinePlacedEffect(g, e.X, e.Y)
 			}
 		}
 	case StateRespawn:
@@ -248,8 +254,10 @@ func (g *Game) updatePlaying() {
 	spawnEnemyThrustParticles(g)
 	updatePowerUps(g)
 	updateMissiles(g)
+	updateMines(g)
 	checkCollisions(g)
 	checkMissileCollisions(g)
+	checkMineCollisions(g)
 	g.Score.Update()
 	g.Wave.Update(g)
 	updateParticles(g)
@@ -314,6 +322,12 @@ func (g *Game) updatePlaying() {
 			spawnMissileBlast(g, e.X, e.Y)
 			g.ShakeFrames = 12
 			g.ShakeAmount = 6
+		case EventMinePlaced:
+			spawnMinePlacedEffect(g, e.X, e.Y)
+		case EventMineExploded:
+			spawnMineBlast(g, e.X, e.Y)
+			g.ShakeFrames = 16
+			g.ShakeAmount = 8
 		case EventShieldAbsorb:
 			spawnExplosion(g, e.X, e.Y, ColorBorder, 45)
 			g.ShakeFrames = 10
@@ -343,6 +357,10 @@ func (g *Game) applyPowerUp(e Event) {
 		}
 	case PowerUpSupercool:
 		g.PlayerPowerUps.SupercoolTimer = SupercoolBuffDuration
+	case PowerUpMine:
+		if g.PlayerPowerUps.MineCount < MineMaxCount {
+			g.PlayerPowerUps.MineCount++
+		}
 	}
 	spawnExplosion(g, e.X, e.Y, ColorBorder, 22)
 }
@@ -450,6 +468,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	drawParticles(s.SceneImage, g, ox, oy)
 	drawPowerUps(s.SceneImage, g, ox, oy)
 	drawProjectiles(s.SceneImage, g, ox, oy)
+	drawMines(s.SceneImage, g, ox, oy)
 	drawMissiles(s.SceneImage, g, ox, oy)
 	drawEnemies(s.SceneImage, g, ox, oy)
 	g.Player.Draw(s.SceneImage, ox, oy, g.Turret.Heat)

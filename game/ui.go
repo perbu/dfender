@@ -87,6 +87,11 @@ func drawPowerUpHUD(screen *ebiten.Image, g *Game) {
 
 	if g.PlayerPowerUps.MissileCount > 0 {
 		drawTextAt(screen, fmt.Sprintf("MSL x%d [E]", g.PlayerPowerUps.MissileCount), FontHUD, baseX, baseY, ColorHeatHot)
+		baseY += 20
+	}
+
+	if g.PlayerPowerUps.MineCount > 0 {
+		drawTextAt(screen, fmt.Sprintf("MINE x%d [Q]", g.PlayerPowerUps.MineCount), FontHUD, baseX, baseY, ColorMine)
 	}
 }
 
