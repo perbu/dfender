@@ -36,11 +36,6 @@ func Fragment(dstPos vec4, srcPos vec2, color vec4) vec4 {
 	intersectGlow := smoothstep(10.0, 0.0, dIntersect) * 0.15 * (0.5 + pulse*0.5)
 	col += vec3(0.15, 0.3, 0.7) * intersectGlow
 
-	// Subtle diagonal sweep.
-	diag := sin((uv.x+uv.y)*0.015 + Time*0.2) * 0.5 + 0.5
-	diagLine := smoothstep(0.97, 1.0, diag) * 0.06
-	col += vec3(0.2, 0.3, 0.6) * diagLine
-
 	// Vignette.
 	center := Resolution * 0.5
 	dist := length(uv - center) / length(center)
