@@ -387,7 +387,7 @@ func (g *Game) updateWaveIntro() {
 	updateParticles(g)
 
 	g.Wave.IntroTick++
-	if g.Wave.IntroTick > 120 { // 2 seconds at 60fps
+	if g.Wave.IntroTick > 210 { // 3.5 seconds at 60fps
 		g.State = StatePlaying
 		g.Wave.StartSpawning(g)
 	}

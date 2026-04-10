@@ -142,15 +142,34 @@ func drawShieldOverlay(screen *ebiten.Image, g *Game, ox, oy float64) {
 	drawPolygon(screen, cx, cy, r, 6, float64(g.Tick)*0.02, 2, col)
 }
 
+// powerUpUnlockWave maps each power-up type to the wave it first becomes available.
+var powerUpUnlockWave = [PowerUpCount]int{
+	PowerUpShield:    1,
+	PowerUpGuns:      2,
+	PowerUpSupercool: 3,
+	PowerUpMissile:   4,
+	PowerUpMine:      5,
+}
+
 func spawnPowerUpDrop(g *Game, x, y float64, waveNumber int) {
-	if waveNumber < 2 {
-		return
-	}
 	if rand.Float64() > PowerUpDropChance {
 		return
 	}
 
-	puType := PowerUpType(rand.Intn(int(PowerUpCount)))
+	// Build pool of unlocked power-up types for this wave.
+	var pool [PowerUpCount]PowerUpType
+	n := 0
+	for t := PowerUpType(0); t < PowerUpCount; t++ {
+		if waveNumber >= powerUpUnlockWave[t] {
+			pool[n] = t
+			n++
+		}
+	}
+	if n == 0 {
+		return
+	}
+
+	puType := pool[rand.Intn(n)]
 
 	g.PowerUps = append(g.PowerUps, PowerUp{
 		X: x, Y: y,

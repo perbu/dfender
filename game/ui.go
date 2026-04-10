@@ -59,6 +59,9 @@ func drawUI(screen *ebiten.Image, g *Game) {
 	if g.State == StateWaveIntro {
 		waveAnnounce := fmt.Sprintf("WAVE %d", g.Wave.Number)
 		drawTextCentered(screen, waveAnnounce, FontMenu, float64(ScreenHeight)/2-40, ColorBorder)
+		if desc := waveDescription(g.Wave.Number); desc != "" {
+			drawTextCentered(screen, desc, FontHUD, float64(ScreenHeight)/2, ColorUI)
+		}
 	}
 
 	// Paused overlay with keymap.
@@ -162,5 +165,33 @@ func drawHeatBar(screen *ebiten.Image, g *Game) {
 	// Label if overheated.
 	if g.Turret.Cooldown > 0 {
 		drawTextAt(screen, "OVERHEAT", FontHUD, float64(barX)-90, float64(barY)-3, ColorHeatHot)
+	}
+}
+
+// waveDescription returns an informational announcement for the given wave number.
+func waveDescription(wave int) string {
+	switch wave {
+	case 1:
+		return "DEFEND THE ARENA"
+	case 2:
+		return "ENEMIES HAVE 2 HP  —  DUAL GUNS DROP"
+	case 3:
+		return "ALPHA ENEMIES ARRIVE  —  FAST BUT UNWIELDY  —  SUPERCOOL DROPS"
+	case 4:
+		return "ENEMIES HAVE 4 HP  —  MISSILE DROPS"
+	case 5:
+		return "PHANTOM ENEMIES ARRIVE  —  THEY TELEPORT  —  MINE DROPS"
+	case 6:
+		return "ENEMIES HAVE 6 HP  —  GOOD LUCK"
+	case 7:
+		return "THE SWARM THICKENS"
+	case 8:
+		return "STILL HERE?"
+	case 9:
+		return "NO MERCY"
+	case 10:
+		return "ALMOST NOBODY MAKES IT THIS FAR"
+	default:
+		return fmt.Sprintf("ENEMIES HAVE %d HP", wave)
 	}
 }
