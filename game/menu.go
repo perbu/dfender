@@ -133,7 +133,6 @@ func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 		drawTextCentered(screen, label, FontMenu, y, clr)
 	}
 
-
 }
 
 type menuEnemy struct {
@@ -157,10 +156,10 @@ func initMenuEnemies() {
 }
 
 const (
-	menuEnemyCY    = float32(ScreenHeight) - 300
-	menuEnemyR     = float32(EnemyRadius) * menuShowcaseScale
-	menuPowerUpCY  = float32(ScreenHeight) - 180
-	menuPowerUpR   = float32(PowerUpRadius) * menuShowcaseScale
+	menuEnemyCY       = float32(ScreenHeight) - 300
+	menuEnemyR        = float32(EnemyRadius) * menuShowcaseScale
+	menuPowerUpCY     = float32(ScreenHeight) - 180
+	menuPowerUpR      = float32(PowerUpRadius) * menuShowcaseScale
 	menuShowcaseScale = 1.3
 )
 
@@ -189,10 +188,10 @@ func drawMenuEnemyLabels(screen *ebiten.Image) {
 }
 
 type menuPowerUp struct {
-	label string
-	col   color.RGBA
-	sides int
-	cx    float32
+	label  string
+	col    color.RGBA
+	sides  int
+	cx     float32
 	labelW float64
 }
 
@@ -252,18 +251,21 @@ func (g *Game) drawCredits(screen *ebiten.Image) {
 	drawTextCentered(screen, "CREDITS", FontMenu, cy, ColorBorder)
 	cy += 60
 
-	drawTextCentered(screen, "Game Design & Programming", FontMenuSmall, cy, ColorUI)
+	drawTextCentered(screen, "Game Design. Programming. Music.", FontMenuSmall, cy, ColorUI)
 	cy += 30
 	drawTextCentered(screen, "Per Buer", FontMenu, cy, ColorBorder)
 	cy += 60
 
-	drawTextCentered(screen, "AI Co-Pilot & Code Generation", FontMenuSmall, cy, ColorUI)
+	drawTextCentered(screen, "AI Code Generation", FontMenuSmall, cy, ColorUI)
 	cy += 30
-	drawTextCentered(screen, "Claude (Anthropic)", FontMenu, cy, ColorBorder)
+	drawTextCentered(screen, "Claude Opus 4.6", FontMenu, cy, ColorBorder)
 	cy += 60
 
-	drawTextCentered(screen, "Built with Ebitengine", FontMenuSmall, cy, ColorUI)
+	drawTextCentered(screen, "Built with Ebitengine in Go", FontMenuSmall, cy, ColorUI)
 	cy += 80
+
+	drawTextCentered(screen, "https://github.com/perbu/dfender", FontMenuSmall, cy, ColorUI)
+	cy += 100
 
 	drawTextCentered(screen, "PRESS ENTER OR ESC TO RETURN", FontMenuSmall, cy, ColorBorderDim)
 }
