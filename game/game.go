@@ -127,6 +127,8 @@ type Game struct {
 	// Pause
 	UnpauseTimer   int       // frames remaining in unpause freeze (0 = not unpausing)
 	PrePauseState  GameState // state to return to after unpause
+
+	iconSet bool // true after window icon has been generated
 }
 
 func New(musicData, fontData []byte) *Game {
@@ -167,6 +169,11 @@ func (g *Game) reset() {
 
 func (g *Game) Update() error {
 	g.Tick++
+
+	if !g.iconSet {
+		g.iconSet = true
+		g.generateWindowIcon()
+	}
 
 	// Global key: toggle music.
 	if inpututil.IsKeyJustPressed(ebiten.KeyM) {
