@@ -215,24 +215,13 @@ func (g *Game) Update() error {
 		}
 		g.Events = g.Events[:0]
 		g.updateWaveIntro()
-		// Drain events so sounds still play during wave intro.
+		// Drain events so juice still plays during wave intro.
 		for _, e := range g.Events {
-			if !e.Silent {
-				g.Sound.HandleEvent(e)
-			}
+			applyJuice(g, e)
+
 			switch e.Type {
-			case EventProjectileWallHit:
-				spawnExplosion(g, e.X, e.Y, ColorProjectile, 18)
-			case EventWallBounce:
-				g.ShakeFrames = 5
-				g.ShakeAmount = 3
-				spawnExplosion(g, e.X, e.Y, ColorBorder, 12)
-			case EventOverheat:
-				spawnExplosion(g, e.X, e.Y, ColorHeatHot, 15)
 			case EventPowerUpPickedUp:
 				g.applyPowerUp(e)
-			case EventMinePlaced:
-				spawnMinePlacedEffect(g, e.X, e.Y)
 			}
 		}
 	case StateRespawn:
@@ -274,20 +263,13 @@ func (g *Game) updatePlaying() {
 
 	// Drain events.
 	for _, e := range g.Events {
-		if !e.Silent {
-			g.Sound.HandleEvent(e)
-		}
+		applyJuice(g, e)
+
 		switch e.Type {
 		case EventEnemyKilled:
 			g.Score.AddKill(int(e.Value))
-			spawnExplosion(g, e.X, e.Y, ColorEnemy, 30)
 			spawnPowerUpDrop(g, e.X, e.Y, g.Wave.Number)
-		case EventEnemyHit:
-			spawnExplosion(g, e.X, e.Y, ColorUI, 8)
-		case EventPlayerDied:
-			g.ShakeFrames = 120
-			g.ShakeAmount = 12
-			spawnDeathExplosion(g, e.X, e.Y)
+		case EventPlayerDied, EventWallDeath:
 			g.Lives--
 			g.Score.Combo = 0
 			g.Score.ComboTimer = 0
@@ -297,54 +279,12 @@ func (g *Game) updatePlaying() {
 				g.respawn()
 			}
 			return
-		case EventWallBounce:
-			g.ShakeFrames = 5
-			g.ShakeAmount = 3
-			spawnExplosion(g, e.X, e.Y, ColorBorder, 12)
-		case EventWallDeath:
-			g.ShakeFrames = 120
-			g.ShakeAmount = 12
-			spawnDeathExplosion(g, e.X, e.Y)
-			g.Lives--
-			g.Score.Combo = 0
-			g.Score.ComboTimer = 0
-			if g.Lives <= 0 {
-				g.State = StateGameOver
-			} else {
-				g.respawn()
-			}
-			return
-		case EventEnemyWallDeath:
-			spawnExplosion(g, e.X, e.Y, ColorEnemy, 22)
-			g.ShakeFrames = 4
-			g.ShakeAmount = 2
 		case EventWaveComplete:
 			g.State = StateWaveIntro
 			g.Wave.NextWave()
 			return
-		case EventOverheat:
-			spawnExplosion(g, e.X, e.Y, ColorHeatHot, 15)
-		case EventProjectileWallHit:
-			spawnExplosion(g, e.X, e.Y, ColorProjectile, 18)
 		case EventPowerUpPickedUp:
 			g.applyPowerUp(e)
-		case EventMissileExploded:
-			spawnMissileBlast(g, e.X, e.Y)
-			g.ShakeFrames = 12
-			g.ShakeAmount = 6
-		case EventMinePlaced:
-			spawnMinePlacedEffect(g, e.X, e.Y)
-		case EventMineExploded:
-			spawnMineBlast(g, e.X, e.Y)
-			g.ShakeFrames = 16
-			g.ShakeAmount = 8
-		case EventShieldAbsorb:
-			spawnExplosion(g, e.X, e.Y, ColorBorder, 45)
-			g.ShakeFrames = 10
-			g.ShakeAmount = 5
-		case EventMissileFired:
-			// Particle burst at launch point.
-			spawnExplosion(g, e.X, e.Y, ColorHeatHot, 12)
 		}
 	}
 
@@ -372,7 +312,6 @@ func (g *Game) applyPowerUp(e Event) {
 			g.PlayerPowerUps.MineCount++
 		}
 	}
-	spawnExplosion(g, e.X, e.Y, ColorBorder, 22)
 }
 
 func (g *Game) updateWaveIntro() {
