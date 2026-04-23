@@ -34,12 +34,12 @@ func spawnExplosion(g *Game, x, y float32, col color.RGBA, count int) {
 }
 
 func spawnDeathExplosion(g *Game, x, y float32) {
-	for i := 0; i < 80; i++ {
+	// Main cloud: 240 particles, 2–4.5s decay.
+	for i := 0; i < 240; i++ {
 		angle := rand.Float32() * 2 * pi32
-		speed := 0.5 + rand.Float32()*6.0
-		life := 60 + rand.Intn(90) // 1–2.5 seconds — much longer than normal
+		speed := 0.5 + rand.Float32()*8.0
+		life := 120 + rand.Intn(150)
 		col := ColorPlayer
-		// Mix in some white/orange particles for variety.
 		if rand.Float64() < 0.3 {
 			col = ColorUI
 		}
@@ -48,8 +48,36 @@ func spawnDeathExplosion(g *Game, x, y float32) {
 			VX: cos32(angle) * speed,
 			VY: sin32(angle) * speed,
 			Life: life, MaxLife: life,
-			Size:  3 + rand.Float32()*4,
+			Size:  3 + rand.Float32()*5,
 			Color: col,
+		})
+	}
+	// Fast bright flash ring: short-lived, high velocity, pure white.
+	for i := 0; i < 60; i++ {
+		angle := rand.Float32() * 2 * pi32
+		speed := 9.0 + rand.Float32()*5.0
+		life := 20 + rand.Intn(15)
+		g.Particles = append(g.Particles, Particle{
+			X: x, Y: y,
+			VX: cos32(angle) * speed,
+			VY: sin32(angle) * speed,
+			Life: life, MaxLife: life,
+			Size:  2 + rand.Float32()*2,
+			Color: ColorUI,
+		})
+	}
+	// Slow smouldering embers: lingering debris that drifts.
+	for i := 0; i < 40; i++ {
+		angle := rand.Float32() * 2 * pi32
+		speed := 0.2 + rand.Float32()*1.5
+		life := 200 + rand.Intn(120)
+		g.Particles = append(g.Particles, Particle{
+			X: x, Y: y,
+			VX: cos32(angle) * speed,
+			VY: sin32(angle) * speed,
+			Life: life, MaxLife: life,
+			Size:  2 + rand.Float32()*3,
+			Color: ColorPlayer,
 		})
 	}
 }
