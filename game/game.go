@@ -108,8 +108,9 @@ type Game struct {
 	Events []Event
 
 	// Lives
-	Lives        int
-	RespawnTimer int // frames remaining in respawn freeze
+	Lives             int
+	RespawnTimer      int       // frames remaining in respawn freeze
+	PostRespawnState  GameState // state to enter after respawn freeze ends
 
 	// Screen shake
 	ShakeFrames int
@@ -231,6 +232,16 @@ func (g *Game) Update() error {
 			applyJuice(g, e)
 
 			switch e.Type {
+			case EventPlayerDied, EventWallDeath:
+				g.Lives--
+				g.Score.Combo = 0
+				g.Score.ComboTimer = 0
+				if g.Lives <= 0 {
+					g.State = StateGameOver
+				} else {
+					g.respawn()
+				}
+				return nil
 			case EventPowerUpPickedUp:
 				g.applyPowerUp(e)
 			}
@@ -361,6 +372,10 @@ func (g *Game) submitHighScore() {
 }
 
 func (g *Game) respawn() {
+	// Resume into whichever gameplay state we died from — otherwise dying
+	// during a wave intro would skip the remaining intro and trigger an
+	// instant EventWaveComplete (no enemies, empty queue) on the next frame.
+	g.PostRespawnState = g.State
 	g.Player = NewPlayer(ScreenWidth/2, ScreenHeight/2+100)
 	g.Turret.Heat = 0
 	g.Turret.Cooldown = 0
@@ -380,7 +395,7 @@ func (g *Game) updateRespawn() {
 	g.RespawnTimer--
 	if g.RespawnTimer <= 0 {
 		g.Player.InvulnFrames = InvulnDuration
-		g.State = StatePlaying
+		g.State = g.PostRespawnState
 	}
 }
 
