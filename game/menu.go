@@ -68,6 +68,15 @@ func drawTextAt(screen *ebiten.Image, s string, face *text.GoTextFace, x, y floa
 	text.Draw(screen, s, face, op)
 }
 
+// drawTextRight draws text right-aligned at the given X position.
+func drawTextRight(screen *ebiten.Image, s string, face *text.GoTextFace, x, y float64, clr color.Color) {
+	w, _ := text.Measure(s, face, 0)
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(x-w, y)
+	op.ColorScale.ScaleWithColor(clr)
+	text.Draw(screen, s, face, op)
+}
+
 func (g *Game) drawMenuScreen(screen *ebiten.Image) {
 	s := g.Shaders
 
@@ -292,19 +301,32 @@ func (g *Game) drawHighScores(screen *ebiten.Image) {
 	if len(g.HighScores.Entries) == 0 {
 		drawTextCentered(screen, "No scores yet. Go play!", FontMenuSmall, cy+40, ColorUI)
 	} else {
+		// Column positions (table centered around screen midpoint).
+		mid := float64(ScreenWidth) / 2
+		colRank := mid - 380
+		colName := mid - 330
+		colScore := mid + 40  // right edge
+		colWave := mid + 180  // right edge
+		colDate := mid + 320  // right edge
+
 		// Header.
-		header := fmt.Sprintf("%-4s  %-12s  %8s  %5s   %s", "#", "NAME", "SCORE", "WAVE", "DATE")
-		drawTextCentered(screen, header, FontMenuSmall, cy, ColorBorderDim)
+		drawTextAt(screen, "#", FontMenuSmall, colRank, cy, ColorBorderDim)
+		drawTextAt(screen, "NAME", FontMenuSmall, colName, cy, ColorBorderDim)
+		drawTextRight(screen, "SCORE", FontMenuSmall, colScore, cy, ColorBorderDim)
+		drawTextRight(screen, "WAVE", FontMenuSmall, colWave, cy, ColorBorderDim)
+		drawTextRight(screen, "DATE", FontMenuSmall, colDate, cy, ColorBorderDim)
 		cy += 35
 
 		for i, e := range g.HighScores.Entries {
-			line := fmt.Sprintf("%-4d  %-12s  %8d  %5d   %s",
-				i+1, e.Name, e.Score, e.Wave, e.Date.Format("2006-01-02"))
 			clr := color.Color(ColorUI)
 			if i == 0 {
 				clr = ColorBorder
 			}
-			drawTextCentered(screen, line, FontMenuSmall, cy, clr)
+			drawTextAt(screen, fmt.Sprintf("%d", i+1), FontMenuSmall, colRank, cy, clr)
+			drawTextAt(screen, e.Name, FontMenuSmall, colName, cy, clr)
+			drawTextRight(screen, fmt.Sprintf("%d", e.Score), FontMenuSmall, colScore, cy, clr)
+			drawTextRight(screen, fmt.Sprintf("%d", e.Wave), FontMenuSmall, colWave, cy, clr)
+			drawTextRight(screen, e.Date.Format("2006-01-02"), FontMenuSmall, colDate, cy, clr)
 			cy += 30
 		}
 	}

@@ -14,7 +14,7 @@ func (g *Game) updateSettings() {
 		inpututil.IsKeyJustPressed(ebiten.KeyEnter) ||
 		inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) ||
 		inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
-		g.Settings.CanonRelativeControls = !g.Settings.CanonRelativeControls
+		g.Settings.CannonRelativeControls = !g.Settings.CannonRelativeControls
 	}
 }
 
@@ -24,12 +24,12 @@ func (g *Game) drawSettings(screen *ebiten.Image) {
 	drawTextCentered(screen, "SETTINGS", FontMenu, cy, ColorBorder)
 	cy += 90
 
-	drawTextCentered(screen, "CANON-RELATIVE STEERING", FontMenuSmall, cy, ColorUI)
+	drawTextCentered(screen, "CANNON-RELATIVE STEERING", FontMenuSmall, cy, ColorUI)
 	cy += 40
 
 	var valStr string
 	valColor := ColorUI
-	if g.Settings.CanonRelativeControls {
+	if g.Settings.CannonRelativeControls {
 		valStr = "[ ON ]"
 		valColor = ColorBorder
 	} else {

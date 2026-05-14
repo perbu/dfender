@@ -58,7 +58,7 @@ func (p *Player) Update(g *Game) {
 	}
 
 	// Thruster input.
-	if g.Settings.CanonRelativeControls {
+	if g.Settings.CannonRelativeControls {
 		// Forward = turret direction; right = 90° clockwise from forward.
 		angle := g.Turret.Angle
 		fdx := cos32(angle)
@@ -161,7 +161,7 @@ func (p *Player) SpawnThrustParticles(g *Game) {
 	}
 	exhaust := ColorPlayer
 
-	if g.Settings.CanonRelativeControls {
+	if g.Settings.CannonRelativeControls {
 		angle := g.Turret.Angle
 		fdx := cos32(angle)
 		fdy := sin32(angle)

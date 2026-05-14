@@ -13,6 +13,7 @@ import (
 const (
 	statusTextY  = 22.0 // Y for FontHUD text in status bar
 	statusScoreY = 16.0 // Y for FontMenu score (taller font)
+	statusBarPad = 5.0  // extra padding clipped from status bar background
 
 	// Fixed X positions for power-up indicators (don't shift when others appear/disappear).
 	puSlotShield = 200.0
@@ -23,7 +24,7 @@ const (
 )
 
 func drawUI(screen *ebiten.Image, g *Game) {
-	sbH := float32(ArenaMargin + StatusBarHeight - 5) // status bar background height
+	sbH := float32(ArenaMargin + StatusBarHeight) - statusBarPad // status bar background height
 
 	// Status bar background.
 	vector.DrawFilledRect(screen, 0, 0, float32(ScreenWidth), sbH,
@@ -107,8 +108,8 @@ func drawPauseOverlay(screen *ebiten.Image, g *Game) {
 	actX := float64(ScreenWidth)/2 + 20
 	for _, k := range keymapEntries {
 		action := k.action
-		if k.key == "WASD" && g.Settings.CanonRelativeControls {
-			action = "THRUST (CANON-REL)"
+		if k.key == "WASD" && g.Settings.CannonRelativeControls {
+			action = "THRUST (CANNON-REL)"
 		}
 		drawTextAt(screen, k.key, FontHUD, keyX, cy, ColorBorder)
 		drawTextAt(screen, action, FontHUD, actX, cy, ColorUI)

@@ -44,7 +44,7 @@ func (w *WaveManager) Update(g *Game) {
 		w.SpawnTimer--
 		if w.SpawnTimer <= 0 {
 			w.SpawnTimer = w.SpawnInterval
-			w.spawnOne(g)
+			w.spawnEnemy(g)
 			w.SpawnQueue--
 		}
 	}
@@ -56,7 +56,7 @@ func (w *WaveManager) Update(g *Game) {
 	}
 }
 
-func (w *WaveManager) spawnOne(g *Game) {
+func (w *WaveManager) spawnEnemy(g *Game) {
 	gates := Gates()
 	gate := gates[w.GateIndex%4]
 	w.GateIndex++

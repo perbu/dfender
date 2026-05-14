@@ -7,15 +7,16 @@ import (
 )
 
 const (
-	TurretRotSpeed   = pi32 // radians per second → 180 deg/s
-	TurretLength     = 38.0
-	FireRate         = 6  // frames between shots (10/sec at 60fps)
-	GunsFireRate     = 3  // frames between shots with guns powerup
-	GunsSpread       = 0.08 // radians spread for double barrel
-	ProjectileSpeed  = 12.0
-	HeatPerShot      = 0.05  // ~2 sec to overheat at 10 rps
-	HeatDecay        = 0.004 // ~4 sec to cool from full
-	CooldownTime     = 120   // frames (2 sec)
+	TurretRotSpeed         = pi32  // radians per second → 180 deg/s
+	TurretLength           = 38.0
+	FireRate               = 6     // frames between shots (10/sec at 60fps)
+	GunsFireRate           = 3     // frames between shots with guns powerup
+	GunsSpread             = 0.08  // radians spread for double barrel
+	ProjectileSpeed        = 12.0
+	HeatPerShot            = 0.05  // ~2 sec to overheat at 10 rps
+	HeatDecay              = 0.004 // ~4 sec to cool from full
+	CooldownTime           = 120   // frames (2 sec)
+	OverheatWarningInterval = 20   // frames between overheat warning beeps
 )
 
 type Turret struct {
@@ -49,7 +50,7 @@ func (t *Turret) Update(g *Game) {
 		t.Heat = float32(t.Cooldown) / float32(CooldownTime)
 		if t.Cooldown == 0 {
 			t.Heat = 0
-		} else if t.Cooldown%20 == 0 {
+		} else if t.Cooldown%OverheatWarningInterval == 0 {
 			g.Events = append(g.Events, Event{Type: EventOverheatWarning})
 		}
 		return
@@ -130,12 +131,7 @@ func (t *Turret) Update(g *Game) {
 	}
 }
 
-func (t *Turret) Draw(screen *ebiten.Image, g *Game, ox, oy float32) {
-	if !g.Player.Alive {
-		return
-	}
-	cx := g.Player.X + ox
-	cy := g.Player.Y + oy
+func (t *Turret) Draw(screen *ebiten.Image, cx, cy float32) {
 	dx := cos32(t.Angle)
 	dy := sin32(t.Angle)
 

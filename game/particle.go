@@ -8,6 +8,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+const (
+	ParticleDrag = 0.97 // air resistance per frame
+)
+
 type Particle struct {
 	X, Y     float32
 	VX, VY   float32
@@ -103,8 +107,8 @@ func updateParticles(g *Game) {
 		p := &g.Particles[i]
 		p.X += p.VX
 		p.Y += p.VY
-		p.VX *= 0.97 // drag
-		p.VY *= 0.97
+		p.VX *= ParticleDrag
+		p.VY *= ParticleDrag
 		p.Life--
 	}
 	g.Particles = compact(g.Particles, func(p *Particle) bool { return p.Life > 0 })

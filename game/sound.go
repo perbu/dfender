@@ -148,6 +148,11 @@ func (sm *SoundManager) ToggleMusic() {
 }
 
 // play fires a one-shot SFX from a pre-generated buffer, limiting polyphony.
+//
+// Volume is applied at two stages:
+//   1. Per‑preset volume baked into the SFXParams in sfxr.go (controls relative loudness).
+//   2. sfxVolume applied here at the mixer (master attenuation to avoid
+//      clipping when many sounds play simultaneously).
 func (sm *SoundManager) play(buf *[]byte) {
 	// Clean up finished players
 	active := sm.activePlayers[buf]

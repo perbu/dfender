@@ -58,8 +58,13 @@ func checkCollisions(g *Game) {
 	}
 
 	g.Player.CheckWalls(g)
+	checkProjectileEnemyCollisions(g)
+	checkPowerUpCollisions(g)
+	checkEnemyPlayerCollisions(g)
+}
 
-	// Projectile vs enemy — squared distance, no sqrt.
+// checkProjectileEnemyCollisions — squared distance, no sqrt.
+func checkProjectileEnemyCollisions(g *Game) {
 	for i := range g.Projectiles {
 		p := &g.Projectiles[i]
 		if !p.Alive {
@@ -91,11 +96,10 @@ func checkCollisions(g *Game) {
 			}
 		}
 	}
+}
 
-	checkPowerUpCollisions(g)
-
-
-	// Enemy vs player — squared distance (skip if invulnerable).
+// checkEnemyPlayerCollisions — squared distance (skip if invulnerable).
+func checkEnemyPlayerCollisions(g *Game) {
 	if g.Player.InvulnFrames > 0 {
 		return
 	}

@@ -1,7 +1,8 @@
 package game
 
 const (
-	ComboWindow = 120 // frames (2 seconds)
+	ComboWindow        = 120 // frames (2 seconds)
+	WaveBonusMultiplier = 500 // points per wave number
 )
 
 type ScoreTracker struct {
@@ -21,7 +22,7 @@ func (s *ScoreTracker) AddKill(points int) {
 }
 
 func (s *ScoreTracker) AddWaveBonus(wave int) {
-	s.Score += 500 * wave
+	s.Score += WaveBonusMultiplier * wave
 }
 
 func (s *ScoreTracker) Update() {

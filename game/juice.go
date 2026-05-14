@@ -1,5 +1,22 @@
 package game
 
+// Event → Juice mapping:
+//
+//   EnemyKilled       → 30-particle teal explosion
+//   EnemyHit          →  8-particle white flash
+//   PlayerDied        → death explosion + 120-frame/12px shake
+//   WallDeath         → same as PlayerDied
+//   WallBounce        →  5-frame/3px shake + 12-particle gold explosion
+//   EnemyWallDeath    →  4-frame/2px shake + 22-particle teal explosion
+//   Overheat          → 15-particle red explosion
+//   ProjectileWallHit → 18-particle gold explosion
+//   MissileExploded   → 12-frame/6px shake + missile blast
+//   MissileFired      → 12-particle red explosion
+//   MinePlaced        → mine placed effect
+//   MineExploded      → 16-frame/8px shake + mine blast
+//   ShieldAbsorb      → 10-frame/5px shake + 45-particle gold explosion
+//   PowerUpPickedUp   → 22-particle gold explosion
+//
 // applyJuice handles the visual and audio reactions to game events:
 // particle effects, screen shake, and sound. Game mechanics (score,
 // lives, state transitions) stay in the event drain in game.go.

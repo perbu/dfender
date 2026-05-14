@@ -27,6 +27,9 @@ const (
 const (
 	EnemyRadius = 22.0
 
+	// Minimum speed before enemy thrust particles appear.
+	EnemyThrustParticleMinSpeed = 0.5
+
 	// Normal: moderate speed, fixed turn rate.
 	EnemyNormalSpeed    = 1.5
 	EnemyNormalTurnRate = 0.04
@@ -128,7 +131,7 @@ func updateEnemies(g *Game) {
 		e.Y += e.VY
 
 		// Wall collision: enemies explode on contact, but not inside gate openings.
-		if enemyHitsWall(e) {
+		if e.hitsWall() {
 			e.Alive = false
 			g.Events = append(g.Events, Event{
 				Type: EventEnemyWallDeath, X: e.X, Y: e.Y,
@@ -170,9 +173,9 @@ func teleportBlinky(g *Game, e *Enemy) {
 	spawnExplosion(g, e.X, e.Y, ColorEnemyGreen, 12)
 }
 
-// enemyHitsWall returns true if the enemy is outside the arena bounds,
+// hitsWall returns true if the enemy is outside the arena bounds,
 // excluding the gate openings where enemies enter.
-func enemyHitsWall(e *Enemy) bool {
+func (e *Enemy) hitsWall() bool {
 	halfGate := float32(GateWidth) / 2
 	r := float32(EnemyRadius)
 	top, bottom := ArenaTop(), ArenaBottom()
@@ -203,7 +206,7 @@ func spawnEnemyThrustParticles(g *Game) {
 			continue
 		}
 		speed := sqrt32(e.VX*e.VX + e.VY*e.VY)
-		if speed < 0.5 {
+		if speed < EnemyThrustParticleMinSpeed {
 			continue
 		}
 		// Exhaust opposite to movement direction.

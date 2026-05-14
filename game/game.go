@@ -21,6 +21,12 @@ const (
 
 	// Gate dimensions.
 	GateWidth = 120
+
+	// Wave intro / state timings (in frames at 60 TPS).
+	WaveIntroDuration = 210
+
+	// Render thresholds.
+	HeatDistortThreshold = 0.3
 )
 
 // Art deco color palette.
@@ -64,7 +70,7 @@ const (
 
 // Settings holds persistent player preferences.
 type Settings struct {
-	CanonRelativeControls bool // W/A/S/D thrust direction follows the turret angle
+	CannonRelativeControls bool // W/A/S/D thrust direction follows the turret angle
 }
 
 const (
@@ -229,21 +235,8 @@ func (g *Game) Update() error {
 		g.updateWaveIntro()
 		// Drain events so juice still plays during wave intro.
 		for _, e := range g.Events {
-			applyJuice(g, e)
-
-			switch e.Type {
-			case EventPlayerDied, EventWallDeath:
-				g.Lives--
-				g.Score.Combo = 0
-				g.Score.ComboTimer = 0
-				if g.Lives <= 0 {
-					g.State = StateGameOver
-				} else {
-					g.respawn()
-				}
+			if g.handleGameplayEvent(e) {
 				return nil
-			case EventPowerUpPickedUp:
-				g.applyPowerUp(e)
 			}
 		}
 	case StateRespawn:
@@ -285,29 +278,19 @@ func (g *Game) updatePlaying() {
 
 	// Drain events.
 	for _, e := range g.Events {
-		applyJuice(g, e)
+		if g.handleGameplayEvent(e) {
+			return
+		}
 
 		switch e.Type {
 		case EventEnemyKilled:
 			g.Score.AddKill(int(e.Value))
 			spawnPowerUpDrop(g, e.X, e.Y, g.Wave.Number)
-		case EventPlayerDied, EventWallDeath:
-			g.Lives--
-			g.Score.Combo = 0
-			g.Score.ComboTimer = 0
-			if g.Lives <= 0 {
-				g.State = StateGameOver
-			} else {
-				g.respawn()
-			}
-			return
 		case EventWaveComplete:
 			clearPersistentPowerUps(g)
 			g.State = StateWaveIntro
 			g.Wave.NextWave()
 			return
-		case EventPowerUpPickedUp:
-			g.applyPowerUp(e)
 		}
 	}
 
@@ -315,6 +298,28 @@ func (g *Game) updatePlaying() {
 	if g.ShakeFrames > 0 {
 		g.ShakeFrames--
 	}
+}
+
+// handleGameplayEvent dispatches the juice and common event reactions
+// (death, power-up pickup). Returns true if the caller should stop processing.
+func (g *Game) handleGameplayEvent(e Event) bool {
+	applyJuice(g, e)
+
+	switch e.Type {
+	case EventPlayerDied, EventWallDeath:
+		g.Lives--
+		g.Score.Combo = 0
+		g.Score.ComboTimer = 0
+		if g.Lives <= 0 {
+			g.State = StateGameOver
+		} else {
+			g.respawn()
+		}
+		return true
+	case EventPowerUpPickedUp:
+		g.applyPowerUp(e)
+	}
+	return false
 }
 
 func (g *Game) applyPowerUp(e Event) {
@@ -352,7 +357,7 @@ func (g *Game) updateWaveIntro() {
 	updateParticles(g)
 
 	g.Wave.IntroTick++
-	if g.Wave.IntroTick > 210 { // 3.5 seconds at 60fps
+	if g.Wave.IntroTick > WaveIntroDuration {
 		g.State = StatePlaying
 		g.Wave.StartSpawning(g)
 		spawnCornerPowerUps(g)
@@ -450,14 +455,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	drawEnemies(s.SceneImage, g, ox, oy)
 	g.Player.Draw(s.SceneImage, ox, oy, g.Turret.Heat)
 	drawShieldOverlay(s.SceneImage, g, ox, oy)
-	g.Turret.Draw(s.SceneImage, g, ox, oy)
+	if g.Player.Alive {
+		g.Turret.Draw(s.SceneImage, g.Player.X+ox, g.Player.Y+oy)
+	}
 
 	// --- Post-processing ---
 
 	// Heat distortion (when gun is hot).
 	turretTipX := g.Player.X + cos32(g.Turret.Angle)*TurretLength
 	turretTipY := g.Player.Y + sin32(g.Turret.Angle)*TurretLength
-	if g.Turret.Heat > 0.3 {
+	if g.Turret.Heat > HeatDistortThreshold {
 		s.HeatTemp.Clear()
 		s.ApplyHeatDistortion(s.HeatTemp, s.SceneImage, g.Turret.Heat, turretTipX, turretTipY, g.Tick)
 		s.SceneImage.Clear()
