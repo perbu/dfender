@@ -214,11 +214,11 @@ var menuPowerUps []menuPowerUp
 
 func initMenuPowerUps() {
 	menuPowerUps = []menuPowerUp{
-		{"SHIELD", ColorShield, 6, 0, 0},
-		{"GUNS", ColorPlayer, 5, 0, 0},
 		{"MISSILE", ColorHeatHot, 4, 0, 0},
-		{"COOL", ColorSupercool, 7, 0, 0},
 		{"MINE", ColorMine, -5, 0, 0},
+		{"GUNS", ColorPlayer, 5, 0, 0},
+		{"SHIELD", ColorShield, 6, 0, 0},
+		{"COOL", ColorSupercool, 7, 0, 0},
 		{"LIFE", ColorExtraLife, 0, 0, 0},
 	}
 	spacing := float32(200)

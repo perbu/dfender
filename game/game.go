@@ -196,14 +196,6 @@ func (g *Game) Update() error {
 		g.Sound.ToggleMusic()
 	}
 
-	// Tick powerup timers (shared across playing states).
-	if g.PlayerPowerUps.GunsTimer > 0 {
-		g.PlayerPowerUps.GunsTimer--
-	}
-	if g.PlayerPowerUps.SupercoolTimer > 0 {
-		g.PlayerPowerUps.SupercoolTimer--
-	}
-
 	switch g.State {
 	case StateMenu:
 		g.updateMenu()
@@ -218,6 +210,7 @@ func (g *Game) Update() error {
 			g.State = StatePaused
 			break
 		}
+		g.tickPowerUpTimers()
 		g.Events = g.Events[:0]
 		g.updatePlaying()
 	case StatePaused:
@@ -231,6 +224,7 @@ func (g *Game) Update() error {
 			g.State = StatePaused
 			break
 		}
+		g.tickPowerUpTimers()
 		g.Events = g.Events[:0]
 		g.updateWaveIntro()
 		// Drain events so juice still plays during wave intro.
@@ -507,7 +501,7 @@ var gates = [4]Gate{
 
 func Gates() [4]Gate { return gates }
 
-func drawArena(screen *ebiten.Image, g *Game, ox, oy float32) {
+func drawArena(screen *ebiten.Image, _ *Game, ox, oy float32) {
 	l := ArenaLeft() + ox
 	r := ArenaRight() + ox
 	t := ArenaTop() + oy

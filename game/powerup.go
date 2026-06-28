@@ -275,3 +275,12 @@ func drawHeart(screen *ebiten.Image, cx, cy, size, rotation, thickness float32, 
 		vector.StrokeLine(screen, pts[i].x, pts[i].y, pts[j].x, pts[j].y, thickness, col, AntiAlias)
 	}
 }
+
+func (g *Game) tickPowerUpTimers() {
+	if g.PlayerPowerUps.GunsTimer > 0 {
+		g.PlayerPowerUps.GunsTimer--
+	}
+	if g.PlayerPowerUps.SupercoolTimer > 0 {
+		g.PlayerPowerUps.SupercoolTimer--
+	}
+}
